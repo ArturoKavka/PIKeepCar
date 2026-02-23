@@ -38,7 +38,7 @@ public class KeepCarApplication {
             "║  H2 Console → http://localhost:8080/h2-console ║\n" +
             "║  API REST   → http://localhost:8080/api      ║\n" +
             "║                                              ║\n" +
-            "║  Equipo: Amael | Almendra | Arturo           ║\n" +
+            "║  Equipo:           Amael |  Arturo           ║\n" +
             "╚══════════════════════════════════════════════╝\n"
         );
     }
