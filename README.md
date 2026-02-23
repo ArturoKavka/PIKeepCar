@@ -92,40 +92,6 @@ Abre `http://localhost:8080` en el navegador.
 
 ---
 
-## Configuración de funcionalidades opcionales
-
-### 1. Chat IA con Groq
-
-El asistente mecánico usa la API de **Groq** (gratuita). Para activarlo:
-
-1. Regístrate en [https://console.groq.com](https://console.groq.com)
-2. Crea una API key (empieza por `gsk_...`)
-3. Edita `src/main/resources/application.properties`:
-   ```properties
-   grok.api.key=gsk_TU_API_KEY_AQUI
-   ```
-4. Reinicia la aplicación
-
-También puedes introducir la key directamente en la app: `Ajustes → Chat IA (Groq)`.
-
-### 2. Login con Google OAuth2
-
-Para activar el login con Google necesitas registrar la app en Google Cloud Console:
-
-1. Ve a [https://console.cloud.google.com](https://console.cloud.google.com)
-2. Crea un proyecto → APIs y Servicios → Credenciales → Crear credencial OAuth 2.0
-3. Tipo: **Aplicación web**
-4. URI de redirección autorizado: `http://localhost:8080/login/oauth2/code/google`
-5. Copia el **Client ID** y **Client Secret**
-6. Edita `application.properties`:
-   ```properties
-   spring.security.oauth2.client.registration.google.client-id=TU_CLIENT_ID
-   spring.security.oauth2.client.registration.google.client-secret=TU_CLIENT_SECRET
-   ```
-7. Reinicia la aplicación
-
----
-
 ## Funcionalidades principales
 
 - **Control de aceite:** alertas en tiempo real según kilómetros recorridos
@@ -218,4 +184,4 @@ X-User-Rol: USER | ADMIN
 
 ## Licencia
 
-Proyecto educativo — IES Batoi 2025/26. No para uso en producción.
+Proyecto educativo — CIP FP CHESTE 2025/26. No para uso en producción.
