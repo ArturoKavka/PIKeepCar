@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KeepCar · Panel Admin</title>
+<style>
+:root{
+  --p:#6366F1;--p2:#4F46E5;--p-glow:rgba(99,102,241,.22);--acc:#8B5CF6;
+  --bg:#030712;--s1:#0F172A;--s2:#1E293B;--s3:#334155;
+  --bdr:#1E293B;--bdr2:#2D3748;
+  --txt:#F1F5F9;--t2:#94A3B8;--t3:#64748B;
+  --g:#22C55E;--g-bg:rgba(34,197,94,.12);
+  --y:#EAB308;--y-bg:rgba(234,179,8,.12);
+  --r:#EF4444;--r-bg:rgba(239,68,68,.12);
+  --o:#F97316;--o-bg:rgba(249,115,22,.12);
+  --b:#3B82F6;--b-bg:rgba(59,130,246,.12);
+  --cyan:#06B6D4;--cyan-bg:rgba(6,182,212,.12);
+  --violet:#8B5CF6;--violet-bg:rgba(139,92,246,.12);
+  --shadow:0 20px 60px rgba(0,0,0,.6);
+  --r8:8px;--r12:12px;--r16:16px;
+  --tr:.18s cubic-bezier(.4,0,.2,1);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;}
+::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:var(--s1)}::-webkit-scrollbar-thumb{background:var(--s3);border-radius:3px}
+
+/* ── LOGIN ── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.92);display:flex;align-items:center;justify-content:center;z-index:9999;backdrop-filter:blur(8px);}
+.login-card{background:var(--s1);border:1px solid var(--bdr);border-radius:var(--r16);padding:2.5rem 2.2rem;width:360px;box-shadow:var(--shadow);animation:su .35s ease;}
+@keyframes su{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+.login-logo{text-align:center;margin-bottom:1.8rem;}
+.login-logo .icon{width:56px;height:56px;background:linear-gradient(135deg,var(--y),var(--o));border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.8rem;margin:0 auto .8rem;box-shadow:0 0 30px rgba(234,179,8,.3);}
+.login-logo h1{font-size:1.4rem;font-weight:800;}
+.login-logo p{color:var(--t3);font-size:.8rem;margin-top:3px;}
+.field{margin-bottom:.9rem;}
+.field label{display:block;font-size:.74rem;color:var(--t2);font-weight:600;margin-bottom:.4rem;text-transform:uppercase;letter-spacing:.04em;}
+.field input{width:100%;padding:.65rem .9rem;background:var(--s2);border:1px solid var(--bdr2);border-radius:var(--r8);color:var(--txt);font-size:.9rem;outline:none;transition:border-color var(--tr),box-shadow var(--tr);}
+.field input:focus{border-color:var(--p);box-shadow:0 0 0 3px var(--p-glow);}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:.62rem 1rem;border:none;border-radius:var(--r8);font-size:.85rem;font-weight:600;cursor:pointer;transition:all var(--tr);white-space:nowrap;}
+.btn-p{background:linear-gradient(135deg,var(--y),var(--o));color:#fff;width:100%;box-shadow:0 4px 15px rgba(234,179,8,.25);}
+.btn-p:hover{transform:translateY(-1px);box-shadow:0 8px 25px rgba(234,179,8,.35);}
+.btn-ghost{background:transparent;color:var(--t2);border:1px solid var(--bdr2);}
+.btn-ghost:hover{background:var(--s2);color:var(--txt);}
+.btn-sm{padding:.3rem .7rem;font-size:.77rem;}
+.btn-red{background:var(--r-bg);color:var(--r);border:1px solid rgba(239,68,68,.2);}
+.err{color:var(--r);font-size:.8rem;text-align:center;margin-top:.6rem;padding:.5rem;background:var(--r-bg);border-radius:var(--r8);}
+.hidden{display:none!important;}
+
+/* ── NAVBAR ── */
+.navbar{background:rgba(15,23,42,.98);border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;height:60px;position:sticky;top:0;z-index:100;backdrop-filter:blur(12px);}
+.nav-brand{display:flex;align-items:center;gap:10px;}
+.nav-brand .icon{width:32px;height:32px;background:linear-gradient(135deg,var(--y),var(--o));border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;}
+.nav-brand span{font-size:1.05rem;font-weight:800;}
+.nav-brand .admin-badge{background:linear-gradient(135deg,var(--y),var(--o));color:#000;font-size:.65rem;font-weight:800;padding:2px 8px;border-radius:12px;letter-spacing:.05em;text-transform:uppercase;}
+.live-pill{display:flex;align-items:center;gap:6px;background:var(--g-bg);border:1px solid rgba(34,197,94,.2);border-radius:20px;padding:4px 12px;font-size:.75rem;color:var(--g);font-weight:600;}
+.live-dot{width:7px;height:7px;background:var(--g);border-radius:50%;animation:pulse 1.4s ease infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
+.nav-right{display:flex;align-items:center;gap:.75rem;}
+.av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--y),var(--o));display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;}
+.nav-uname{font-size:.82rem;font-weight:600;}
+
+/* ── LAYOUT ── */
+.app{display:flex;height:calc(100vh - 60px);}
+.sidebar{width:220px;min-width:220px;background:var(--s1);border-right:1px solid var(--bdr);display:flex;flex-direction:column;overflow-y:auto;padding:.75rem 0;}
+.sb-section{padding:.25rem .75rem .1rem;font-size:.65rem;color:var(--t3);font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-top:.5rem;}
+.sb-btn{display:flex;align-items:center;gap:9px;padding:.55rem .9rem;cursor:pointer;border-radius:var(--r8);margin:1px .5rem;font-size:.84rem;color:var(--t2);border:none;background:none;width:calc(100% - 1rem);text-align:left;transition:all var(--tr);}
+.sb-btn:hover{background:var(--s2);color:var(--txt);}
+.sb-btn.active{background:rgba(99,102,241,.15);color:var(--txt);border:1px solid rgba(99,102,241,.25);}
+.sb-btn .sb-count{margin-left:auto;font-size:.7rem;background:var(--s3);padding:1px 7px;border-radius:10px;color:var(--t2);}
+.sb-btn.active .sb-count{background:var(--p);color:#fff;}
+.content{flex:1;overflow-y:auto;padding:1.4rem;}
+
+/* ── STAT CARDS ── */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.8rem;margin-bottom:1.4rem;}
+.stat{background:var(--s1);border:1px solid var(--bdr);border-radius:var(--r12);padding:1.1rem 1.2rem;position:relative;overflow:hidden;cursor:pointer;transition:all var(--tr);}
+.stat:hover{transform:translateY(-2px);border-color:var(--bdr2);}
+.stat::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.stat.blue::before{background:linear-gradient(90deg,var(--p),var(--acc));}
+.stat.green::before{background:var(--g);}
+.stat.red::before{background:var(--r);}
+.stat.yellow::before{background:var(--y);}
+.stat.orange::before{background:var(--o);}
+.stat.cyan::before{background:var(--cyan);}
+.stat-val{font-size:1.9rem;font-weight:800;line-height:1;}
+.stat-lbl{color:var(--t3);font-size:.73rem;margin-top:.25rem;font-weight:500;}
+.stat-sub{color:var(--t3);font-size:.68rem;margin-top:.2rem;}
+
+/* ── SEARCH BAR ── */
+.search-row{display:flex;align-items:center;gap:.6rem;margin-bottom:1rem;}
+.search-row input,.search-row select{background:var(--s1);border:1px solid var(--bdr);border-radius:var(--r8);color:var(--txt);padding:.5rem .8rem;font-size:.82rem;outline:none;transition:border-color var(--tr);}
+.search-row input{flex:1;}
+.search-row input:focus,.search-row select:focus{border-color:var(--p);}
+.search-row select{cursor:pointer;}
+
+/* ── TABLA LOGS ── */
+.tbl-wrap{background:var(--s1);border:1px solid var(--bdr);border-radius:var(--r12);overflow:hidden;}
+.kc-tbl{width:100%;border-collapse:collapse;}
+.kc-tbl th{background:rgba(255,255,255,.025);padding:.55rem .85rem;text-align:left;font-size:.7rem;color:var(--t3);font-weight:700;border-bottom:1px solid var(--bdr);letter-spacing:.05em;text-transform:uppercase;}
+.kc-tbl td{padding:.62rem .85rem;font-size:.8rem;border-bottom:1px solid var(--bdr);vertical-align:middle;}
+.kc-tbl tr:last-child td{border-bottom:none;}
+.kc-tbl tr:hover td{background:rgba(255,255,255,.012);}
+.kc-tbl tr.new-row td{animation:flash .8s ease;}
+@keyframes flash{from{background:rgba(99,102,241,.2)}to{background:transparent}}
+.time-col{color:var(--t3);font-size:.72rem;white-space:nowrap;}
+
+/* ── BADGES ACCIÓN ── */
+.ab{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:12px;font-size:.7rem;font-weight:700;letter-spacing:.02em;}
+.ab-login{background:var(--g-bg);color:var(--g);}
+.ab-logout{background:var(--s2);color:var(--t2);}
+.ab-crear{background:var(--b-bg);color:var(--b);}
+.ab-editar{background:var(--y-bg);color:var(--y);}
+.ab-eliminar{background:var(--r-bg);color:var(--r);}
+.ab-km{background:var(--cyan-bg);color:var(--cyan);}
+.ab-mant{background:var(--violet-bg);color:var(--violet);}
+.ab-pass{background:var(--o-bg);color:var(--o);}
+.ab-notif{background:var(--s2);color:var(--t3);}
+
+/* ── ROL BADGE ── */
+.rol-badge{display:inline-flex;align-items:center;gap:3px;font-size:.7rem;padding:2px 7px;border-radius:10px;font-weight:600;}
+.rol-admin{background:rgba(234,179,8,.12);color:var(--y);}
+.rol-user{background:var(--s2);color:var(--t3);}
+
+/* ── USER CARDS ── */
+.users-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:.9rem;}
+.user-card{background:var(--s1);border:1px solid var(--bdr);border-radius:var(--r12);padding:1.2rem;transition:all var(--tr);cursor:pointer;}
+.user-card:hover{border-color:var(--bdr2);transform:translateY(-2px);box-shadow:0 8px 25px rgba(0,0,0,.3);}
+.user-head{display:flex;align-items:center;gap:.8rem;margin-bottom:.9rem;}
+.user-av{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.95rem;flex-shrink:0;}
+.user-av.admin{background:linear-gradient(135deg,var(--y),var(--o));}
+.user-av.user{background:linear-gradient(135deg,var(--p),var(--acc));}
+.user-info .name{font-size:.92rem;font-weight:700;}
+.user-info .uname{font-size:.75rem;color:var(--t3);margin-top:1px;}
+.user-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem;margin-top:.75rem;}
+.user-stat{background:var(--s2);border-radius:var(--r8);padding:.5rem;text-align:center;}
+.user-stat .val{font-size:1rem;font-weight:700;}
+.user-stat .lbl{font-size:.64rem;color:var(--t3);margin-top:1px;}
+
+/* ── VEHÍCULOS ADMIN ── */
+.veh-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:.9rem;}
+.veh-card{background:var(--s1);border:1px solid var(--bdr);border-radius:var(--r12);padding:1.1rem;position:relative;overflow:hidden;transition:all var(--tr);}
+.veh-card:hover{border-color:var(--bdr2);}
+.veh-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.veh-card.verde::before{background:var(--g);}
+.veh-card.amarillo::before{background:var(--y);}
+.veh-card.rojo::before{background:var(--r);}
+.veh-title{font-size:.9rem;font-weight:700;margin-bottom:2px;}
+.veh-sub{font-size:.74rem;color:var(--t3);}
+.veh-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:.6rem;}
+.tag{display:inline-flex;align-items:center;padding:2px 8px;border-radius:12px;font-size:.7rem;font-weight:600;}
+.tag.g{background:var(--g-bg);color:var(--g);}
+.tag.y{background:var(--y-bg);color:var(--y);}
+.tag.r{background:var(--r-bg);color:var(--r);}
+.tag.b{background:var(--b-bg);color:var(--b);}
+.tag.grey{background:var(--s2);color:var(--t3);}
+.tag.o{background:var(--o-bg);color:var(--o);}
+
+/* ── MISC ── */
+.section-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:.9rem;}
+.section-hdr h3{font-size:1rem;font-weight:700;}
+.loading{text-align:center;padding:2rem;color:var(--t3);}
+.spinner{display:inline-block;width:24px;height:24px;border:2px solid var(--bdr);border-top-color:var(--p);border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty{text-align:center;color:var(--t3);padding:2rem;font-size:.85rem;}
+.chip{display:inline-flex;align-items:center;gap:4px;background:var(--s2);border:1px solid var(--bdr);border-radius:8px;padding:3px 9px;font-size:.75rem;color:var(--t2);}
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--s1);border:1px solid var(--bdr);border-left:3px solid var(--g);border-radius:var(--r12);padding:.75rem 1.1rem;box-shadow:var(--shadow);z-index:999;transform:translateX(130%);transition:transform .28s;font-size:.83rem;}
+.toast.show{transform:translateX(0);}
+</style>
+</head>
+<body>
+
+<!-- LOGIN (solo si no hay sesión admin activa) -->
+<div class="overlay" id="loginOverlay">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="icon">🛡️</div>
+      <h1>Panel Administrador</h1>
+      <p>KeepCar · Acceso exclusivo admin</p>
+    </div>
+    <div class="field"><label>Usuario (admin)</label><input type="text" id="lUser" placeholder="arturo, amael, almendra"></div>
+    <div class="field"><label>Contraseña</label><input type="password" id="lPass"></div>
+    <button class="btn btn-p" onclick="doLogin()">Acceder al panel</button>
+    <div class="err hidden" id="lErr">Credenciales incorrectas o sin permisos de administrador.</div>
+  </div>
+</div>
+
+<!-- NAVBAR -->
+<nav class="navbar hidden" id="navbar">
+  <div class="nav-brand">
+    <div class="icon">🛡️</div>
+    <span>KeepCar</span>
+    <span class="admin-badge">ADMIN</span>
+    <a href="/" style="margin-left:.6rem;font-size:.78rem;color:var(--t3);text-decoration:none;">← App</a>
+  </div>
+  <div class="live-pill"><span class="live-dot"></span>LIVE · <span id="liveTs">–</span></div>
+  <div class="nav-right">
+    <div class="av" id="navAv">–</div>
+    <span class="nav-uname" id="navName">–</span>
+    <button class="btn btn-ghost btn-sm" onclick="doLogout()">Salir</button>
+  </div>
+</nav>
+
+<!-- APP -->
+<div class="app hidden" id="appWrap">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sb-section">Vistas</div>
+    <button class="sb-btn active" id="sb-dashboard" onclick="showView('dashboard')">📊 Dashboard <span class="sb-count" id="sc-dashboard">–</span></button>
+    <button class="sb-btn" id="sb-logs" onclick="showView('logs')">📋 Actividad <span class="sb-count" id="sc-logs">–</span></button>
+    <button class="sb-btn" id="sb-usuarios" onclick="showView('usuarios')">👥 Usuarios <span class="sb-count" id="sc-usuarios">–</span></button>
+    <button class="sb-btn" id="sb-vehiculos" onclick="showView('vehiculos')">🚗 Vehículos <span class="sb-count" id="sc-vehiculos">–</span></button>
+
+    <div class="sb-section" style="margin-top:1rem;">Acciones rápidas</div>
+    <button class="sb-btn" onclick="window.open('/h2-console','_blank')">🗄️ H2 Console</button>
+    <button class="sb-btn" onclick="window.open('/api','_blank')">⚡ API Info</button>
+    <button class="sb-btn" onclick="refreshAll()">🔄 Actualizar todo</button>
+  </aside>
+
+  <!-- CONTENT -->
+  <main class="content">
+
+    <!-- ══ DASHBOARD ══ -->
+    <div id="view-dashboard">
+      <div class="section-hdr"><h3>📊 Dashboard General</h3><span class="chip" id="lastUpdate">–</span></div>
+      <div class="stats-grid">
+        <div class="stat blue" onclick="showView('usuarios')"><div class="stat-val" id="d-users" style="color:#818CF8">–</div><div class="stat-lbl">Usuarios</div><div class="stat-sub" id="d-admins">– admins</div></div>
+        <div class="stat green"  onclick="showView('vehiculos')"><div class="stat-val" id="d-vehs"  style="color:var(--g)">–</div><div class="stat-lbl">Vehículos</div><div class="stat-sub">activos</div></div>
+        <div class="stat red"    onclick="showView('vehiculos')"><div class="stat-val" id="d-urgent" style="color:var(--r)">–</div><div class="stat-lbl">Aceite urgente</div></div>
+        <div class="stat yellow" onclick="showView('vehiculos')"><div class="stat-val" id="d-prox"   style="color:var(--y)">–</div><div class="stat-lbl">Aceite próximo</div></div>
+        <div class="stat orange" onclick="showView('vehiculos')"><div class="stat-val" id="d-itv"    style="color:var(--o)">–</div><div class="stat-lbl">ITV alertas</div></div>
+        <div class="stat cyan"   onclick="showView('logs')"><div class="stat-val" id="d-actions" style="color:var(--cyan)">–</div><div class="stat-lbl">Acciones hoy</div></div>
+      </div>
+
+      <!-- Actividad reciente mini -->
+      <div class="section-hdr" style="margin-top:1.4rem;"><h3>⚡ Actividad reciente</h3><button class="btn btn-ghost btn-sm" onclick="showView('logs')">Ver todo →</button></div>
+      <div class="tbl-wrap" id="dashLogs">
+        <div class="loading"><div class="spinner"></div></div>
+      </div>
+    </div>
+
+    <!-- ══ LOGS ══ -->
+    <div id="view-logs" class="hidden">
+      <div class="section-hdr"><h3>📋 Registro de Actividad</h3>
+        <div style="display:flex;gap:.5rem;align-items:center;">
+          <span class="chip" id="logsCount">0 entradas</span>
+          <span class="chip live-pill" style="background:var(--g-bg);border-color:rgba(34,197,94,.2);color:var(--g);font-size:.72rem;"><span class="live-dot"></span>Tiempo real</span>
+        </div>
+      </div>
+      <div class="search-row">
+        <input type="text" id="logSearch" placeholder="🔍 Buscar por usuario, acción, detalle..." oninput="renderLogs()">
+        <select id="logFilterAccion" onchange="renderLogs()">
+          <option value="">Todas las acciones</option>
+          <option value="LOGIN">🟢 Login</option>
+          <option value="LOGOUT">⚪ Logout</option>
+          <option value="CREAR_VEHICULO">🔵 Crear vehículo</option>
+          <option value="EDITAR_VEHICULO">🟡 Editar vehículo</option>
+          <option value="ELIMINAR_VEHICULO">🔴 Eliminar vehículo</option>
+          <option value="ACTUALIZAR_KM">🔵 Actualizar km</option>
+          <option value="REGISTRAR_MANTENIMIENTO">🟣 Mantenimiento</option>
+          <option value="CAMBIAR_PASSWORD">🟠 Cambio contraseña</option>
+        </select>
+        <select id="logFilterUser" onchange="renderLogs()">
+          <option value="">Todos los usuarios</option>
+        </select>
+        <button class="btn btn-ghost btn-sm" onclick="limpiarFiltros()">✕ Limpiar</button>
+      </div>
+      <div class="tbl-wrap">
+        <table class="kc-tbl">
+          <thead><tr><th>Hora</th><th>Usuario</th><th>Rol</th><th>Acción</th><th>Detalle</th></tr></thead>
+          <tbody id="logsTbody"><tr><td colspan="5" class="loading"><div class="spinner"></div></td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ USUARIOS ══ -->
+    <div id="view-usuarios" class="hidden">
+      <div class="section-hdr"><h3>👥 Usuarios del sistema</h3><span class="chip" id="usersCount">–</span></div>
+      <div class="search-row">
+        <input type="text" id="userSearch" placeholder="🔍 Buscar usuario..." oninput="renderUsuarios()">
+        <select id="userFilterRol" onchange="renderUsuarios()">
+          <option value="">Todos los roles</option>
+          <option value="ADMIN">👑 Admin</option>
+          <option value="USER">👤 User</option>
+        </select>
+      </div>
+      <div class="users-grid" id="usersGrid">
+        <div class="loading"><div class="spinner"></div></div>
+      </div>
+    </div>
+
+    <!-- ══ VEHÍCULOS ══ -->
+    <div id="view-vehiculos" class="hidden">
+      <div class="section-hdr"><h3>🚗 Todos los vehículos</h3><span class="chip" id="vehsCount">–</span></div>
+      <div class="search-row">
+        <input type="text" id="vehSearch" placeholder="🔍 Buscar marca, modelo, matrícula..." oninput="renderVehiculos()">
+        <select id="vehFilterEstado" onchange="renderVehiculos()">
+          <option value="">Todos los estados</option>
+          <option value="ROJO">🔴 Aceite urgente</option>
+          <option value="AMARILLO">🟡 Aceite próximo</option>
+          <option value="VERDE">🟢 Al día</option>
+        </select>
+        <select id="vehFilterUser" onchange="renderVehiculos()">
+          <option value="">Todos los propietarios</option>
+        </select>
+      </div>
+      <div class="veh-grid" id="vehsGrid">
+        <div class="loading"><div class="spinner"></div></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = '/api';
+let session = null;
+let allLogs  = [];
+let allUsers = [];
+let allVehs  = [];
+let lastLogId = 0;
+let pollingInterval = null;
+
+function hdrs() {
+  return {
+    'Content-Type': 'application/json',
+    'X-User-Id':    session?.id   || 0,
+    'X-User-Name':  session?.nombre || '',
+    'X-User-Rol':   'ADMIN'
+  };
+}
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+function timeAgo(d) {
+  const diff = Date.now() - new Date(d).getTime();
+  const m = Math.floor(diff/60000), h = Math.floor(diff/3600000);
+  const dy = Math.floor(diff/86400000);
+  if (m < 1) return 'Ahora';
+  if (m < 60) return `${m}m`;
+  if (h < 24) return `${h}h`;
+  return `${dy}d`;
+}
+function formatTs(d) {
+  return new Date(d).toLocaleString('es-ES', {day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}
+
+// ================================================================
+//  AUTH – bypass si hay sesión admin guardada desde index.html
+// ================================================================
+(function checkSavedSession() {
+  const saved = sessionStorage.getItem('kc_admin_session');
+  if (saved) {
+    try {
+      const s = JSON.parse(saved);
+      if (s.esAdmin) { session = s; startAdmin(); return; }
+    } catch(e) {}
+    sessionStorage.removeItem('kc_admin_session');
+  }
+})();
+
+async function doLogin() {
+  const u = document.getElementById('lUser').value.trim();
+  const p = document.getElementById('lPass').value.trim();
+  if (!u || !p) return;
+  try {
+    const res = await fetch(`${API}/auth/login`, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({usuario: u, password: p})
+    });
+    const d = await res.json();
+    if (d.success && d.esAdmin) {
+      session = d;
+      sessionStorage.setItem('kc_admin_session', JSON.stringify(d));
+      startAdmin();
+    } else {
+      document.getElementById('lErr').classList.remove('hidden');
+    }
+  } catch(e) { alert('Error: ' + e.message); }
+}
+async function doLogout() {
+  try { await fetch(`${API}/auth/logout`, {method:'POST', headers:hdrs()}); } catch(e) {}
+  sessionStorage.removeItem('kc_admin_session');
+  session = null; location.reload();
+}
+document.addEventListener('keydown', e => { if (e.key==='Enter') doLogin(); });
+
+function startAdmin() {
+  document.getElementById('loginOverlay').classList.add('hidden');
+  document.getElementById('navbar').classList.remove('hidden');
+  document.getElementById('appWrap').classList.remove('hidden');
+  document.getElementById('navAv').textContent  = session.avatarIniciales || session.nombre.charAt(0);
+  document.getElementById('navName').textContent = session.nombre;
+  refreshAll();
+  startPolling();
+}
+
+// ================================================================
+//  VISTAS
+// ================================================================
+function showView(name) {
+  ['dashboard','logs','usuarios','vehiculos'].forEach(v => {
+    document.getElementById('view-'+v).classList.add('hidden');
+    document.getElementById('sb-'+v).classList.remove('active');
+  });
+  document.getElementById('view-'+name).classList.remove('hidden');
+  document.getElementById('sb-'+name).classList.add('active');
+}
+
+// ================================================================
+//  REFRESH
+// ================================================================
+async function refreshAll() {
+  document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('es-ES');
+  await Promise.all([cargarDashboard(), cargarLogs(), cargarUsuarios(), cargarVehiculos()]);
+}
+
+async function cargarDashboard() {
+  try {
+    const res = await fetch(`${API}/admin/dashboard`, {headers: hdrs()});
+    const d = await res.json();
+    document.getElementById('d-users').textContent   = d.totalUsuarios   ?? '–';
+    document.getElementById('d-admins').textContent  = `${d.totalAdmins||0} admins`;
+    document.getElementById('d-vehs').textContent    = d.vehiculosActivos ?? '–';
+    document.getElementById('d-urgent').textContent  = d.alertasUrgentes  ?? '–';
+    document.getElementById('d-prox').textContent    = d.alertasProximas  ?? '–';
+    document.getElementById('d-itv').textContent     = d.itvAlertas       ?? '–';
+    document.getElementById('d-actions').textContent = d.accionesHoy      ?? '–';
+    document.getElementById('sc-dashboard').textContent = d.vehiculosActivos ?? '–';
+  } catch(e) {}
+  renderDashLogs();
+}
+
+function renderDashLogs() {
+  const el = document.getElementById('dashLogs');
+  const recent = allLogs.slice(0, 8);
+  if (!recent.length) { el.innerHTML='<div class="empty">Sin actividad aún.</div>'; return; }
+  el.innerHTML = `<table class="kc-tbl">
+    <thead><tr><th>Hora</th><th>Usuario</th><th>Acción</th><th>Detalle</th></tr></thead>
+    <tbody>${recent.map(l => `<tr>
+      <td class="time-col">${formatTs(l.timestamp)}</td>
+      <td>${l.usuarioNombre || l.usuarioUsername}</td>
+      <td>${accionBadge(l.accion)}</td>
+      <td style="color:var(--t2);max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${l.detalle||'–'}</td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+}
+
+// ================================================================
+//  LOGS
+// ================================================================
+async function cargarLogs() {
+  try {
+    const res = await fetch(`${API}/admin/logs`, {headers: hdrs()});
+    const d = await res.json();
+    allLogs   = d.logs || [];
+    lastLogId = d.ultimoId || 0;
+    document.getElementById('sc-logs').textContent = allLogs.length;
+    // Poblar filtro usuarios
+    const users = [...new Set(allLogs.map(l => l.usuarioUsername))];
+    const sel = document.getElementById('logFilterUser');
+    const curVal = sel.value;
+    sel.innerHTML = '<option value="">Todos los usuarios</option>' +
+      users.map(u => `<option value="${u}" ${u===curVal?'selected':''}>${u}</option>`).join('');
+    renderLogs();
+  } catch(e) {}
+}
+function renderLogs() {
+  const q     = document.getElementById('logSearch').value.toLowerCase();
+  const acc   = document.getElementById('logFilterAccion').value;
+  const user  = document.getElementById('logFilterUser').value;
+  const tbody = document.getElementById('logsTbody');
+  const filtered = allLogs.filter(l =>
+    (!q || `${l.usuarioNombre}${l.usuarioUsername}${l.detalle}${l.accion}`.toLowerCase().includes(q)) &&
+    (!acc  || l.accion === acc) &&
+    (!user || l.usuarioUsername === user)
+  );
+  document.getElementById('logsCount').textContent = `${filtered.length} entradas`;
+  if (!filtered.length) { tbody.innerHTML='<tr><td colspan="5" class="empty">Sin resultados.</td></tr>'; return; }
+  tbody.innerHTML = filtered.map(l => `<tr>
+    <td class="time-col">${formatTs(l.timestamp)}</td>
+    <td><strong>${l.usuarioNombre||l.usuarioUsername}</strong><br><span style="color:var(--t3);font-size:.7rem">@${l.usuarioUsername}</span></td>
+    <td><span class="rol-badge ${l.rol?.toLowerCase()==='admin'?'rol-admin':'rol-user'}">${l.rol?.toLowerCase()==='admin'?'👑':'👤'} ${l.rol||'USER'}</span></td>
+    <td>${accionBadge(l.accion)}</td>
+    <td style="color:var(--t2);max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${l.detalle||''}">${l.detalle||'–'}</td>
+  </tr>`).join('');
+}
+function limpiarFiltros() {
+  document.getElementById('logSearch').value='';
+  document.getElementById('logFilterAccion').value='';
+  document.getElementById('logFilterUser').value='';
+  renderLogs();
+}
+function accionBadge(a) {
+  const m = {
+    LOGIN:'ab-login',LOGOUT:'ab-logout',CREAR_VEHICULO:'ab-crear',EDITAR_VEHICULO:'ab-editar',
+    ELIMINAR_VEHICULO:'ab-eliminar',ACTUALIZAR_KM:'ab-km',REGISTRAR_MANTENIMIENTO:'ab-mant',
+    CAMBIAR_PASSWORD:'ab-pass',MARCAR_NOTIFICACION:'ab-notif'
+  };
+  const label = { LOGIN:'🟢 Login',LOGOUT:'⚪ Logout',CREAR_VEHICULO:'🔵 Crear',EDITAR_VEHICULO:'🟡 Editar',
+    ELIMINAR_VEHICULO:'🔴 Eliminar',ACTUALIZAR_KM:'🔵 Km',REGISTRAR_MANTENIMIENTO:'🟣 Mantenimiento',
+    CAMBIAR_PASSWORD:'🟠 Password',MARCAR_NOTIFICACION:'💬 Notif'};
+  return `<span class="ab ${m[a]||'ab-notif'}">${label[a]||a}</span>`;
+}
+
+// ================================================================
+//  POLLING TIEMPO REAL
+// ================================================================
+function startPolling() {
+  if (pollingInterval) clearInterval(pollingInterval);
+  pollingInterval = setInterval(async () => {
+    try {
+      const res = await fetch(`${API}/admin/logs/nuevos?sinceId=${lastLogId}`, {headers: hdrs()});
+      const d = await res.json();
+      if (d.cantidad > 0) {
+        const newRows = d.nuevos.reverse();
+        allLogs = [...newRows, ...allLogs].slice(0, 500);
+        lastLogId = d.ultimoId;
+        renderLogs();
+        renderDashLogs();
+        document.getElementById('sc-logs').textContent = allLogs.length;
+        document.getElementById('liveTs').textContent = new Date().toLocaleTimeString('es-ES');
+        // Flashear filas nuevas
+        newRows.forEach(l => {
+          const rows = document.querySelectorAll('#logsTbody tr');
+          rows.forEach(r => { if(r.cells[0]?.textContent === formatTs(l.timestamp)) r.classList.add('new-row'); });
+        });
+        toast(`⚡ ${d.cantidad} nueva${d.cantidad>1?'s':''} acción${d.cantidad>1?'es':''}`);
+      }
+    } catch(e) {}
+    document.getElementById('liveTs').textContent = new Date().toLocaleTimeString('es-ES');
+  }, 3000);
+}
+
+// ================================================================
+//  USUARIOS
+// ================================================================
+async function cargarUsuarios() {
+  try {
+    const res = await fetch(`${API}/admin/usuarios`, {headers: hdrs()});
+    allUsers = await res.json();
+    document.getElementById('sc-usuarios').textContent = allUsers.length;
+    document.getElementById('usersCount').textContent  = `${allUsers.length} usuarios`;
+    renderUsuarios();
+  } catch(e) {}
+}
+function renderUsuarios() {
+  const q    = document.getElementById('userSearch').value.toLowerCase();
+  const rol  = document.getElementById('userFilterRol').value;
+  const grid = document.getElementById('usersGrid');
+  const filtered = allUsers.filter(u =>
+    (!q || `${u.nombre}${u.username}${u.email}`.toLowerCase().includes(q)) &&
+    (!rol || u.rol === rol)
+  );
+  if (!filtered.length) { grid.innerHTML='<div class="empty">Sin usuarios.</div>'; return; }
+  grid.innerHTML = filtered.map(u => {
+    const isAdm = u.rol === 'ADMIN';
+    const vehs  = allVehs.filter(v => v.propietarioId === u.id);
+    const urgentes = vehs.filter(v => v.estadoAceite === 'ROJO').length;
+    const logins  = allLogs.filter(l => l.usuarioUsername === u.username && l.accion === 'LOGIN').length;
+    return `<div class="user-card">
+      <div class="user-head">
+        <div class="user-av ${isAdm?'admin':'user'}">${u.avatarIniciales||u.nombre.charAt(0)}</div>
+        <div class="user-info">
+          <div class="name">${u.nombre}</div>
+          <div class="uname">@${u.username} <span class="rol-badge ${isAdm?'rol-admin':'rol-user'}">${isAdm?'👑 Admin':'👤 User'}</span></div>
+        </div>
+      </div>
+      <div style="font-size:.74rem;color:var(--t3);margin-bottom:.7rem">${u.email||'–'}</div>
+      <div class="user-stats">
+        <div class="user-stat"><div class="val">${vehs.length}</div><div class="lbl">Vehículos</div></div>
+        <div class="user-stat"><div class="val" style="color:${urgentes>0?'var(--r)':'var(--g)'}">${urgentes}</div><div class="lbl">Urgentes</div></div>
+        <div class="user-stat"><div class="val">${logins}</div><div class="lbl">Logins</div></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ================================================================
+//  VEHÍCULOS
+// ================================================================
+async function cargarVehiculos() {
+  try {
+    const res = await fetch(`${API}/vehiculos`, {headers: hdrs()});
+    allVehs = await res.json();
+    document.getElementById('sc-vehiculos').textContent = allVehs.length;
+    document.getElementById('vehsCount').textContent    = `${allVehs.length} vehículos`;
+    // Poblar filtro propietarios
+    const propNames = [...new Set(allVehs.map(v => v.propietarioNombre||'–'))].sort();
+    const sel = document.getElementById('vehFilterUser');
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">Todos los propietarios</option>' +
+      propNames.map(n => `<option value="${n}" ${n===cur?'selected':''}>${n}</option>`).join('');
+    renderVehiculos();
+  } catch(e) {}
+}
+function renderVehiculos() {
+  const q    = document.getElementById('vehSearch').value.toLowerCase();
+  const est  = document.getElementById('vehFilterEstado').value;
+  const user = document.getElementById('vehFilterUser').value;
+  const grid = document.getElementById('vehsGrid');
+  const filtered = allVehs.filter(v =>
+    (!q || `${v.marca}${v.modelo}${v.matricula}${v.propietarioNombre}`.toLowerCase().includes(q)) &&
+    (!est  || v.estadoAceite === est) &&
+    (!user || v.propietarioNombre === user)
+  );
+  if (!filtered.length) { grid.innerHTML='<div class="empty">Sin vehículos.</div>'; return; }
+  const itvAlerts = filtered.filter(v => v.estadoItv && v.estadoItv !== 'OK' && v.estadoItv !== 'SIN_DATOS').length;
+  document.getElementById('d-itv').textContent = itvAlerts;
+  grid.innerHTML = filtered.map(v => {
+    const ec = (v.estadoAceite||'VERDE').toLowerCase();
+    const itv = v.estadoItv || 'SIN_DATOS';
+    const neu = v.estadoNeumaticos || 'OK';
+    const itvCls = itv==='OK'?'g':itv==='PROXIMA'?'y':itv==='URGENTE'?'o':itv==='VENCIDA'?'r':'grey';
+    const neuCls = neu==='OK'?'g':neu==='REVISAR'?'y':'r';
+    return `<div class="veh-card ${ec}">
+      <div class="veh-title">${v.marca} ${v.modelo} <span style="color:var(--t3);font-size:.8rem">${v.anio||''}</span></div>
+      <div class="veh-sub">${v.matricula||'–'} · ${(v.kilometrajeActual||0).toLocaleString()} km</div>
+      <div class="veh-sub" style="margin-top:3px;color:var(--t2)">👤 ${v.propietarioNombre||'–'}</div>
+      <div class="veh-tags">
+        <span class="tag ${ec==='rojo'?'r':ec==='amarillo'?'y':'g'}">${ec==='rojo'?'🔴 Aceite urgente':ec==='amarillo'?'🟡 Próximo':'🟢 Aceite OK'}</span>
+        ${itv!=='SIN_DATOS'?`<span class="tag ${itvCls}">ITV: ${itv}</span>`:''}
+        ${neu!=='OK'?`<span class="tag ${neuCls}">🔧 ${neu==='CAMBIAR'?'Cambiar ruedas':'Revisar ruedas'}</span>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+╔══════════════════════════════════════════════════════════════════╗
+║            KEEPCAR v3.0 — CREDENCIALES DE ACCESO               ║
+╠══════════════════════════════════════════════════════════════════╣
+║  ADMINISTRADORES (acceso a /admin.html)                        ║
+╠════════════════════╦═══════════════════╦════════════════════════╣
+║ Usuario            ║ Contraseña        ║ Nombre                 ║
+╠════════════════════╬═══════════════════╬════════════════════════╣
+║ arturo             ║ Arturo@Admin1     ║ Arturo Kavka           ║
+║ amael              ║ Amael@Admin2      ║ Amael Silva            ║
+╠════════════════════╩═══════════════════╩════════════════════════╣
+║  USUARIOS NORMALES                                              ║
+╠════════════════════╦═══════════════════╦════════════════════════╣
+║ norly              ║ Norly@2025!       ║ Norly García           ║
+║ denise             ║ D3nise@Garr1do    ║ Denise Garrido Tamarit ║
+║ juan               ║ Juan#Garc1a       ║ Juan García Torres     ║
+║ marcos             ║ Marc0s!2025       ║ Marcos López Ruiz      ║
+║ manu               ║ Manu.H3rn         ║ Manu Hernández Gil     ║
+║ rosa               ║ Rosa&Fl0res       ║ Rosa Martínez Vega     ║
+║ lucia              ║ Lucia*Cars25      ║ Lucía Fernández Ortiz  ║
+║ pedro              ║ P3dro!Motor       ║ Pedro Sánchez Díaz     ║
+║ sofia              ║ S0fia@Drive       ║ Sofía Ruiz Moreno      ║
+╚════════════════════╩═══════════════════╩════════════════════════╝
+
+Arranque: http://localhost:8080
+Admin panel: http://localhost:8080/admin.html  (solo arturo y amael)
+H2 Console: http://localhost:8080/h2-console   (JDBC: jdbc:h2:mem:keepcardb, sa, vacío)

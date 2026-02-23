@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KeepCar – Gestión Vehicular</title>
+<style>
+/* ================================================================
+   KEEPCAR v3.0 - PALETA DE COLORES OFICIAL
+   Primary:  #6366F1 (indigo)
+   Accent:   #8B5CF6 (violet)
+   BG:       #030712
+   Surface1: #0F172A
+   Surface2: #1E293B
+   Surface3: #334155
+   Text:     #F1F5F9
+   Muted:    #64748B
+   Green:    #22C55E
+   Yellow:   #EAB308
+   Red:      #EF4444
+   Orange:   #F97316
+================================================================ */
+:root{
+  --p:     #6366F1; --p2:  #4F46E5; --p-glow:rgba(99,102,241,.25);
+  --acc:   #8B5CF6;
+  --bg:    #030712; --s1: #0F172A; --s2: #1E293B; --s3: #334155;
+  --bdr:   #1E293B; --bdr2:#2D3748;
+  --txt:   #F1F5F9; --t2:  #94A3B8; --t3: #64748B;
+  --g:     #22C55E; --g-bg:rgba(34,197,94,.1);
+  --y:     #EAB308; --y-bg:rgba(234,179,8,.1);
+  --r:     #EF4444; --r-bg:rgba(239,68,68,.1);
+  --o:     #F97316; --o-bg:rgba(249,115,22,.1);
+  --shadow:0 20px 60px rgba(0,0,0,.6);
+  --r8:8px; --r12:12px; --r16:16px;
+  --transition:.18s cubic-bezier(.4,0,.2,1);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;overflow-x:hidden;}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:var(--s1)}
+::-webkit-scrollbar-thumb{background:var(--s3);border-radius:3px}
+
+/* ================================================================
+   LOGIN
+================================================================ */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.92);display:flex;align-items:center;justify-content:center;z-index:9999;backdrop-filter:blur(8px);}
+.login-card{background:var(--s1);border:1px solid var(--bdr);border-radius:var(--r16);padding:2.8rem 2.4rem;width:380px;box-shadow:var(--shadow);animation:slideUp .4s ease;}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.login-logo{text-align:center;margin-bottom:2rem;}
+.login-logo .kc-icon{width:64px;height:64px;background:linear-gradient(135deg,var(--p),var(--acc));border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:2rem;margin:0 auto .9rem;box-shadow:0 0 30px var(--p-glow);}
+.login-logo h1{font-size:1.7rem;font-weight:800;background:linear-gradient(135deg,var(--txt),var(--t2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.login-logo p{color:var(--t3);font-size:.82rem;margin-top:.3rem;}
+.field{margin-bottom:1rem;}
+.field label{display:block;font-size:.78rem;color:var(--t2);font-weight:500;margin-bottom:.45rem;letter-spacing:.03em;text-transform:uppercase;}
+.field input,.field select{width:100%;padding:.7rem 1rem;background:var(--s2);border:1px solid var(--bdr2);border-radius:var(--r8);color:var(--txt);font-size:.95rem;outline:none;transition:border-color var(--transition),box-shadow var(--transition);}
+.field input:focus,.field select:focus{border-color:var(--p);box-shadow:0 0 0 3px var(--p-glow);}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:.72rem 1.2rem;border:none;border-radius:var(--r8);font-size:.9rem;font-weight:600;cursor:pointer;transition:all var(--transition);white-space:nowrap;}
+.btn-primary{background:linear-gradient(135deg,var(--p),var(--acc));color:#fff;box-shadow:0 4px 15px var(--p-glow);}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 8px 25px var(--p-glow);}
+.btn-block{width:100%;}
+.btn-ghost{background:transparent;color:var(--t2);border:1px solid var(--bdr2);}
+.btn-ghost:hover{background:var(--s2);color:var(--txt);}
+.btn-sm{padding:.35rem .8rem;font-size:.8rem;}
+.btn-danger{background:var(--r-bg);color:var(--r);border:1px solid rgba(239,68,68,.25);}
+.btn-danger:hover{background:rgba(239,68,68,.2);}
+.btn-success{background:var(--g-bg);color:var(--g);border:1px solid rgba(34,197,94,.25);}
+.google-btn{background:#fff;color:#374151;border:1px solid #D1D5DB;display:flex;align-items:center;gap:10px;padding:.7rem 1.2rem;border-radius:var(--r8);width:100%;font-size:.92rem;font-weight:500;cursor:pointer;transition:all var(--transition);margin-top:.8rem;}
+.google-btn:hover{background:#F9FAFB;box-shadow:0 2px 12px rgba(0,0,0,.2);}
+.google-btn img{width:20px;height:20px;}
+.divider{display:flex;align-items:center;gap:.75rem;margin:.9rem 0;color:var(--t3);font-size:.78rem;}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--bdr);}
+.err{color:var(--r);font-size:.8rem;text-align:center;margin-top:.6rem;padding:.5rem;background:var(--r-bg);border-radius:var(--r8);border:1px solid rgba(239,68,68,.2);}
+.hidden{display:none!important;}
+
+/* ================================================================
+   NAVBAR
+================================================================ */
+.navbar{background:rgba(15,23,42,.95);border-bottom:1px solid var(--bdr);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;height:64px;position:sticky;top:0;z-index:100;}
+.nav-brand{display:flex;align-items:center;gap:10px;cursor:pointer;text-decoration:none;}
+.nav-brand .icon{width:36px;height:36px;background:linear-gradient(135deg,var(--p),var(--acc));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;box-shadow:0 0 15px var(--p-glow);}
+.nav-brand span{font-size:1.2rem;font-weight:800;color:var(--txt);}
+.nav-tabs{display:flex;gap:2px;}
+.tab-btn{background:none;border:none;color:var(--t2);padding:.5rem .9rem;border-radius:var(--r8);cursor:pointer;font-size:.85rem;font-weight:500;display:flex;align-items:center;gap:6px;transition:all var(--transition);position:relative;}
+.tab-btn:hover{background:var(--s2);color:var(--txt);}
+.tab-btn.active{background:var(--s2);color:var(--txt);box-shadow:inset 0 0 0 1px var(--bdr2);}
+.tab-btn .badge{background:var(--r);color:#fff;font-size:.62rem;font-weight:700;padding:1px 5px;border-radius:10px;min-width:17px;text-align:center;}
+.nav-right{display:flex;align-items:center;gap:.75rem;}
+.avatar-btn{display:flex;align-items:center;gap:.6rem;cursor:pointer;padding:.35rem .7rem;border-radius:var(--r8);transition:background var(--transition);}
+.avatar-btn:hover{background:var(--s2);}
+.avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.82rem;flex-shrink:0;background:linear-gradient(135deg,var(--p),var(--acc));}
+.avatar.admin{background:linear-gradient(135deg,var(--y),var(--o));}
+.nav-user-name{font-size:.85rem;font-weight:500;}
+.nav-user-rol{font-size:.7rem;color:var(--t3);}
+
+/* ================================================================
+   MAIN LAYOUT
+================================================================ */
+.main{max-width:1300px;margin:0 auto;padding:2rem 1.5rem;}
+.page{display:none;}
+.page.active{display:block;}
+.page-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.8rem;}
+.page-hdr h2{font-size:1.25rem;font-weight:700;}
+.page-hdr-sub{color:var(--t3);font-size:.82rem;margin-top:2px;}
+
+/* ================================================================
+   CARDS STATS
+================================================================ */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:.9rem;margin-bottom:1.8rem;}
+.stat{background:var(--s1);border:1px solid var(--bdr);border-radius:var(--r12);padding:1.2rem 1.4rem;position:relative;overflow:hidden;transition:border-color var(--transition);}
+.stat:hover{border-color:var(--bdr2);}
+.stat::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.stat.s-blue::before{background:linear-gradient(90deg,var(--p),var(--acc));}
+.stat.s-red::before{background:var(--r);}
+.stat.s-yellow::before{background:var(--y);}
+.stat.s-green::before{background:var(--g);}
+.stat.s-orange::before{background:var(--o);}
+.stat-val{font-size:2.1rem;font-weight:800;line-height:1;}
+.stat-lbl{color:var(--t3);font-size:.75rem;margin-top:.3rem;font-weight:500;letter-spacing:.02em;}
+
+/* ================================================================
+   CAR CARDS
+================================================================ */
+.cars-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1.1rem;}
+.car-card{background:var(--s1);border:1px solid var(--bdr);border-radius:var(--r16);padding:1.4rem;position:relative;overflow:hidden;transition:all var(--transition);cursor:default;}
+.car-card:hover{border-color:var(--p);transform:translateY(-3px);box-shadow:0 12px 40px rgba(99,102,241,.15);}
+.car-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--r16) var(--r16) 0 0;}
+.car-card.verde::before{background:var(--g);}
+.car-card.amarillo::before{background:var(--y);}
+.car-card.rojo::before{background:var(--r);}
+.car-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.1rem;}
+.car-title{font-size:1.05rem;font-weight:700;}
+.car-sub{font-size:.78rem;color:var(--t3);margin-top:2px;}
+.tag{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:600;}
+.tag.verde{background:var(--g-bg);color:var(--g);}
+.tag.amarillo{background:var(--y-bg);color:var(--y);}
+.tag.rojo{background:var(--r-bg);color:var(--r);}
+.tag.orange{background:var(--o-bg);color:var(--o);}
+.tag.blue{background:var(--p-glow);color:#A5B4FC;}
+.tag.grey{background:var(--s2);color:var(--t3);}
+
+/* Círculo de progreso */
+.circ-row{display:flex;align-items:center;gap:1.1rem;margin-bottom:1rem;}
+.circ-svg{position:relative;width:82px;height:82px;flex-shrink:0;}
+.circ-svg svg{transform:rotate(-90deg);}
+.circ-label{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.circ-pct{font-size:1.05rem;font-weight:800;line-height:1;}
+.circ-txt{font-size:.5rem;color:var(--t3);margin-top:1px;}
+.circ-info .km-val{font-size:1.35rem;font-weight:800;line-height:1;}
+.circ-info .km-lbl{font-size:.76rem;color:var(--t3);margin:.25rem 0;}
+.circ-info .km-detail{font-size:.8rem;color:var(--t2);}
+
+/* Alertas extra del coche (ITV, ruedas) */
+.car-alerts{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0;}
+
+/* Km inline update */
+.km-form{display:flex;gap:7px;padding-top:1rem;border-top:1px solid var(--bdr);margin-top:.5rem;}
+.km-form input{flex:1;padding:.4rem .75rem;background:var(--s2);border:1px solid var(--bdr2);border-radius:var(--r8);color:var(--txt);font-size:.85rem;outline:none;}
+.km-form input:focus{border-color:var(--p);}
+
+/* ================================================================
+   TABLA
+================================================================ */
+.tbl-wrap{background:var(--s1);border:1px solid var(--bdr);border-radius:var(--r16);overflow:hidden;}
+.kc-tbl{width:100%;border-collapse:collapse;}
+.kc-tbl th{background:rgba(255,255,255,.03);padding:.7rem 1rem;text-align:left;font-size:.75rem;color:var(--t3);font-weight:600;border-bottom:1px solid var(--bdr);letter-spacing:.04em;text-transform:uppercase;}
+.kc-tbl td{padding:.8rem 1rem;font-size:.85rem;border-bottom:1px solid var(--bdr);vertical-align:middle;}
+.kc-tbl tr:last-child td{border-bottom:none;}
+.kc-tbl tr:hover td{background:rgba(255,255,255,.015);}
+.actions{display:flex;gap:5px;}
+
+/* ================================================================
+   NOTIFICACIONES
+================================================================ */
+.notif-wrap{display:flex;flex-direction:column;gap:.7rem;}
+.notif-item{background:var(--s1);border:1px solid var(--bdr);border-left:3px solid transparent;border-radius:var(--r12);padding:1rem 1.2rem;display:flex;align-items:flex-start;gap:.9rem;transition:all var(--transition);}
+.notif-item:hover{border-color:var(--bdr2);}
+.notif-item.unread{border-left-color:var(--p);background:rgba(99,102,241,.04);}
+.notif-icon{font-size:1.3rem;flex-shrink:0;}
+.notif-body{flex:1;}
+.notif-msg{font-size:.9rem;line-height:1.5;margin-bottom:.3rem;}
+.notif-meta{font-size:.75rem;color:var(--t3);display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;}
+.notif-actions{display:flex;gap:5px;flex-shrink:0;}
+
+/* ================================================================
+   AJUSTES
+================================================================ */
+.settings-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1rem;}
+.set-card{background:var(--s1);border:1px solid var(--bdr);border-radius:var(--r16);padding:1.5rem;}
+.set-card h3{font-size:.95rem;font-weight:700;margin-bottom:1.2rem;padding-bottom:.75rem;border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:.5rem;}
+.set-row{display:flex;justify-content:space-between;align-items:center;padding:.6rem 0;border-bottom:1px solid var(--bdr);}
+.set-row:last-child{border-bottom:none;}
+.set-row .lbl{font-size:.85rem;color:var(--t2);}
+.set-row .val{font-size:.82rem;color:var(--t3);}
+
+/* ================================================================
+   MODAL VEHÍCULO
+================================================================ */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;z-index:500;backdrop-filter:blur(4px);}
+.modal-box{background:var(--s1);border:1px solid var(--bdr);border-radius:var(--r16);padding:2rem;width:540px;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow);}
+.modal-box h3{font-size:1.1rem;font-weight:700;margin-bottom:1.5rem;}
+.form-2{display:grid;grid-template-columns:1fr 1fr;gap:.9rem;}
+.form-full{grid-column:1/-1;}
+.modal-foot{display:flex;gap:.75rem;margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--bdr);}
+.modal-foot .btn{flex:1;}
+.section-divider{grid-column:1/-1;font-size:.75rem;color:var(--t3);font-weight:600;letter-spacing:.05em;text-transform:uppercase;padding:.5rem 0;border-top:1px solid var(--bdr);margin-top:.25rem;}
+
+/* ================================================================
+   CHAT IA GROK
+================================================================ */
+.chat-modal{position:fixed;bottom:1.5rem;right:1.5rem;width:380px;z-index:300;}
+.chat-card{background:var(--s1);border:1px solid var(--bdr);border-radius:var(--r16);overflow:hidden;box-shadow:var(--shadow);animation:slideUp .3s ease;}
+.chat-header{background:linear-gradient(135deg,var(--p),var(--acc));padding:1rem 1.2rem;display:flex;align-items:center;justify-content:space-between;}
+.chat-header h4{font-size:.95rem;font-weight:700;color:#fff;}
+.chat-header .close-btn{background:none;border:none;color:rgba(255,255,255,.8);cursor:pointer;font-size:1.2rem;padding:2px 6px;border-radius:6px;transition:background var(--transition);}
+.chat-header .close-btn:hover{background:rgba(0,0,0,.2);}
+.chat-msgs{height:320px;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:.75rem;}
+.msg{max-width:80%;padding:.65rem .9rem;border-radius:var(--r12);font-size:.85rem;line-height:1.5;}
+.msg.user{background:linear-gradient(135deg,var(--p),var(--acc));color:#fff;align-self:flex-end;border-bottom-right-radius:4px;}
+.msg.ai{background:var(--s2);color:var(--txt);align-self:flex-start;border-bottom-left-radius:4px;}
+.msg.typing{opacity:.6;}
+.chat-footer{padding:.9rem;border-top:1px solid var(--bdr);}
+.chat-input-row{display:flex;gap:.5rem;}
+.chat-input-row input{flex:1;padding:.6rem .85rem;background:var(--s2);border:1px solid var(--bdr2);border-radius:var(--r8);color:var(--txt);font-size:.85rem;outline:none;}
+.chat-input-row input:focus{border-color:var(--p);}
+.chat-fab{position:fixed;bottom:1.5rem;right:1.5rem;width:56px;height:56px;background:linear-gradient(135deg,var(--p),var(--acc));border:none;border-radius:50%;color:#fff;font-size:1.5rem;cursor:pointer;box-shadow:0 8px 25px var(--p-glow);z-index:290;transition:all var(--transition);display:flex;align-items:center;justify-content:center;}
+.chat-fab:hover{transform:scale(1.1);box-shadow:0 12px 35px var(--p-glow);}
+.chat-key-row{display:flex;gap:.5rem;margin-bottom:.7rem;}
+.chat-key-row input{flex:1;padding:.45rem .75rem;background:var(--s2);border:1px solid var(--bdr2);border-radius:var(--r8);color:var(--txt);font-size:.78rem;outline:none;}
+.chat-key-row input:focus{border-color:var(--p);}
+.chat-key-row span{font-size:.72rem;color:var(--t3);align-self:center;}
+
+/* ================================================================
+   SPECS PANEL
+================================================================ */
+.specs-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:.7rem;margin-top:1rem;}
+.spec-item{background:var(--s2);border:1px solid var(--bdr);border-radius:var(--r8);padding:.75rem;text-align:center;}
+.spec-val{font-size:1rem;font-weight:700;margin-bottom:2px;}
+.spec-lbl{font-size:.68rem;color:var(--t3);}
+
+/* ================================================================
+   LOADING / EMPTY / TOAST
+================================================================ */
+.loading{text-align:center;color:var(--t3);padding:3rem 2rem;}
+.spinner{display:inline-block;width:28px;height:28px;border:3px solid var(--bdr);border-top-color:var(--p);border-radius:50%;animation:spin .7s linear infinite;margin-bottom:.75rem;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty{text-align:center;color:var(--t3);padding:3rem;font-size:.9rem;}
+.toast{position:fixed;bottom:2rem;right:2rem;background:var(--s1);border:1px solid var(--bdr);border-radius:var(--r12);padding:.9rem 1.3rem;box-shadow:var(--shadow);z-index:999;transform:translateX(130%);transition:transform .3s;max-width:330px;font-size:.88rem;display:flex;align-items:center;gap:.6rem;}
+.toast.show{transform:translateX(0);}
+.toast.s{border-left:3px solid var(--g);}
+.toast.e{border-left:3px solid var(--r);}
+.toast.w{border-left:3px solid var(--y);}
+.toast.i{border-left:3px solid var(--p);}
+
+/* ================================================================
+   GOOGLE OAUTH BUTTON SVG INLINE
+================================================================ */
+.g-icon{width:18px;height:18px;flex-shrink:0;}
+
+/* ================================================================
+   RESPONSIVE
+================================================================ */
+@media(max-width:680px){
+  .cars-grid,.form-2,.settings-grid,.specs-row{grid-template-columns:1fr}
+  .main{padding:1rem}
+  .nav-tabs .tab-btn span:not(.badge){display:none}
+  .chat-modal{width:calc(100vw - 2rem);right:1rem}
+}
+</style>
+</head>
+<body>
+
+<!-- ================================================================ LOGIN -->
+<div class="overlay" id="loginOverlay">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="kc-icon">🚗</div>
+      <h1>KeepCar</h1>
+      <p>Gestión profesional de mantenimiento vehicular</p>
+    </div>
+
+    <!-- Google OAuth -->
+    <button class="google-btn" onclick="loginGoogle()">
+      <svg class="g-icon" viewBox="0 0 48 48">
+        <path fill="#FFC107" d="M43.6 20H24v8h11.3C33.6 33.1 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.7 1.1 7.8 2.9L37.5 9C34 5.9 29.2 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20c11 0 20-8 20-20 0-1.3-.2-2.7-.4-4z"/>
+        <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.1 18.9 12 24 12c3 0 5.7 1.1 7.8 2.9L37.5 9C34 5.9 29.2 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/>
+        <path fill="#4CAF50" d="M24 44c5.2 0 9.9-1.9 13.5-5L31 33.6C29.2 34.8 27 36 24 36c-5.3 0-9.5-2.8-11.3-7.1l-6.5 5C9.7 39.8 16.3 44 24 44z"/>
+        <path fill="#1976D2" d="M43.6 20H24v8h11.3c-.8 2.3-2.3 4.1-4.3 5.4L37.4 39C41.6 35.2 44 30 44 24c0-1.3-.2-2.7-.4-4z"/>
+      </svg>
+      Continuar con Google
+    </button>
+
+    <div class="divider">o con usuario y contraseña</div>
+
+    <div class="field"><label>Usuario</label><input type="text" id="lUser" placeholder="arturo, juan, rosa..."></div>
+    <div class="field"><label>Contraseña</label><input type="password" id="lPass" placeholder="Tu contraseña"></div>
+    <button class="btn btn-primary btn-block" onclick="doLogin()">Iniciar sesión</button>
+    <div class="err hidden" id="lErr">Usuario o contraseña incorrectos</div>
+  </div>
+</div>
+
+<!-- ================================================================ NAVBAR -->
+<nav class="navbar hidden" id="navbar">
+  <a class="nav-brand" onclick="goTab('home')" href="javascript:void(0)">
+    <div class="icon">🚗</div>
+    <span>KeepCar</span>
+  </a>
+  <div class="nav-tabs">
+    <button class="tab-btn active" onclick="goTab('home')"    id="tab-home">🏠 <span>Inicio</span></button>
+    <button class="tab-btn"        onclick="goTab('vehiculo')" id="tab-vehiculo">🚗 <span>Vehículos</span></button>
+    <button class="tab-btn"        onclick="goTab('notif')"    id="tab-notif">🔔 <span>Alertas</span><span class="badge hidden" id="badgeCount">0</span></button>
+    <button class="tab-btn"        onclick="goTab('ajustes')"  id="tab-ajustes">⚙️ <span>Ajustes</span></button>
+  </div>
+  <div class="nav-right">
+    <div class="avatar-btn" onclick="goTab('ajustes')" title="Ir a ajustes">
+      <div class="avatar" id="navAvatar">--</div>
+      <div>
+        <div class="nav-user-name" id="navName">--</div>
+        <div class="nav-user-rol" id="navRol">--</div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ================================================================ MAIN -->
+<main class="main hidden" id="mainApp">
+
+  <!-- ==================== HOME ==================== -->
+  <div class="page active" id="page-home">
+    <div class="page-hdr">
+      <div><h2 id="homeTitle">Panel de Control</h2><div class="page-hdr-sub" id="homeSubtitle"></div></div>
+    </div>
+    <div class="stats-row" id="homeStats">
+      <div class="stat s-blue"><div class="stat-val" id="stTotal" style="color:#818CF8">–</div><div class="stat-lbl">Mis vehículos</div></div>
+      <div class="stat s-red"><div class="stat-val" id="stRojo"  style="color:var(--r)">–</div><div class="stat-lbl">Aceite urgente</div></div>
+      <div class="stat s-yellow"><div class="stat-val" id="stAm"  style="color:var(--y)">–</div><div class="stat-lbl">Aceite próximo</div></div>
+      <div class="stat s-green"><div class="stat-val" id="stOk"   style="color:var(--g)">–</div><div class="stat-lbl">Al día</div></div>
+      <div class="stat s-orange"><div class="stat-val" id="stItvAlert" style="color:var(--o)">–</div><div class="stat-lbl">Alertas ITV</div></div>
+    </div>
+    <div class="cars-grid" id="homeCars">
+      <div class="loading"><div class="spinner"></div><div>Cargando vehículos...</div></div>
+    </div>
+  </div>
+
+  <!-- ==================== VEHÍCULOS ==================== -->
+  <div class="page" id="page-vehiculo">
+    <div class="page-hdr">
+      <div><h2>Mis Vehículos</h2><div class="page-hdr-sub">Gestiona, edita y consulta especificaciones</div></div>
+      <button class="btn btn-primary btn-sm" onclick="openAddModal()">+ Añadir vehículo</button>
+    </div>
+    <div class="tbl-wrap" id="vehTbl">
+      <div class="loading"><div class="spinner"></div><div>Cargando...</div></div>
+    </div>
+    <div id="specsPanel"></div>
+  </div>
+
+  <!-- ==================== NOTIFICACIONES ==================== -->
+  <div class="page" id="page-notif">
+    <div class="page-hdr">
+      <div><h2>🔔 Notificaciones</h2><div class="page-hdr-sub">Historial completo de alertas</div></div>
+      <div style="display:flex;gap:.5rem;">
+        <button class="btn btn-ghost btn-sm" onclick="leerTodas()">✓ Marcar todas leídas</button>
+      </div>
+    </div>
+    <div id="notifList">
+      <div class="loading"><div class="spinner"></div><div>Cargando...</div></div>
+    </div>
+  </div>
+
+  <!-- ==================== AJUSTES ==================== -->
+  <div class="page" id="page-ajustes">
+    <div class="page-hdr"><div><h2>⚙️ Ajustes</h2><div class="page-hdr-sub">Configuración de tu cuenta</div></div></div>
+    <div class="settings-grid">
+
+      <div class="set-card">
+        <h3>👤 Mi Perfil</h3>
+        <div class="set-row"><span class="lbl">Nombre</span><span class="val" id="pNombre">–</span></div>
+        <div class="set-row"><span class="lbl">Usuario</span><span class="val" id="pUser">–</span></div>
+        <div class="set-row"><span class="lbl">Email</span><span class="val" id="pEmail">–</span></div>
+        <div class="set-row"><span class="lbl">Teléfono</span><span class="val" id="pTel">–</span></div>
+        <div class="set-row"><span class="lbl">Rol</span><span class="val" id="pRol">–</span></div>
+      </div>
+
+      <div class="set-card">
+        <h3>🔑 Cambiar Contraseña</h3>
+        <div class="field"><label>Contraseña actual</label><input type="password" id="passActual"></div>
+        <div class="field"><label>Nueva contraseña</label><input type="password" id="passNueva"></div>
+        <div class="field"><label>Confirmar nueva</label><input type="password" id="passConfirm"></div>
+        <button class="btn btn-primary" style="width:100%" onclick="cambiarPassword()">Actualizar contraseña</button>
+        <div class="err hidden" id="passErr" style="margin-top:.6rem;"></div>
+      </div>
+
+      <div class="set-card">
+        <h3>🤖 Chat IA (Grok)</h3>
+        <p style="font-size:.82rem;color:var(--t3);margin-bottom:1rem;">Introduce tu API key de Grok (xAI) para usar el asistente de estimación de piezas.</p>
+        <div class="field"><label>API Key Groq (IA)</label><input type="password" id="grokKey" placeholder="gsk_..."></div>
+        <button class="btn btn-primary" style="width:100%" onclick="saveGrokKey()">Guardar clave</button>
+        <div style="margin-top:.75rem;font-size:.78rem;color:var(--t3);">La clave se guarda localmente. Para configurarla globalmente edita <code>application.properties</code>.</div>
+      </div>
+
+      <div class="set-card">
+        <h3>🚪 Sesión</h3>
+        <div class="set-row"><span class="lbl">Estado</span><span class="val" style="color:var(--g)">● Conectado</span></div>
+        <div class="set-row" id="adminPanelRow" style="display:none">
+          <span class="lbl">Panel Admin</span>
+          <a href="/admin.html" target="_blank" class="btn btn-ghost btn-sm">Abrir →</a>
+        </div>
+        <div style="margin-top:1rem;display:flex;flex-direction:column;gap:.6rem;">
+          <button class="btn btn-ghost" style="width:100%" onclick="doLogout()">🚪 Cerrar sesión</button>
+          <a href="/h2-console" target="_blank" class="btn btn-ghost" style="width:100%;text-decoration:none;text-align:center">🗄️ H2 Console</a>
+        </div>
+      </div>
+
+      <div class="set-card">
+        <h3>ℹ️ Sobre KeepCar</h3>
+        <div class="set-row"><span class="lbl">Versión</span><span class="val">3.0.0</span></div>
+        <div class="set-row"><span class="lbl">Backend</span><span class="val">Spring Boot 3.2.5</span></div>
+        <div class="set-row"><span class="lbl">BD</span><span class="val">H2 in-memory</span></div>
+        <div class="set-row"><span class="lbl">Puerto</span><span class="val">8080</span></div>
+        <div class="set-row"><span class="lbl">Equipo</span><span class="val">Amael · Almendra · Arturo</span></div>
+        <div class="set-row"><span class="lbl">Ciclo</span><span class="val">DAM 2025/26</span></div>
+      </div>
+
+    </div>
+  </div>
+
+</main>
+
+<!-- ================================================================ MODAL VEHÍCULO -->
+<div class="modal-bg hidden" id="modalVeh">
+  <div class="modal-box">
+    <h3 id="modalVehTitle">➕ Nuevo Vehículo</h3>
+    <input type="hidden" id="vehId">
+    <div class="form-2">
+      <div class="field"><label>Marca *</label><input type="text" id="vMarca" placeholder="BMW, SEAT..."></div>
+      <div class="field"><label>Modelo *</label><input type="text" id="vModelo" placeholder="Serie 3, León..."></div>
+      <div class="field"><label>Año</label><input type="number" id="vAnio" placeholder="2020" min="1990" max="2030"></div>
+      <div class="field"><label>Matrícula</label><input type="text" id="vMatricula" placeholder="1234-ABC"></div>
+      <div class="field"><label>Km actuales *</label><input type="number" id="vKmActual" placeholder="50000"></div>
+      <div class="field"><label>Km último aceite</label><input type="number" id="vKmUltimo" placeholder="45000"></div>
+
+      <div class="section-divider">⚙️ Especificaciones técnicas</div>
+      <div class="field"><label>Motor (cc)</label><input type="number" id="vMotor" placeholder="1998"></div>
+      <div class="field"><label>Potencia (CV)</label><input type="number" id="vCV" placeholder="150"></div>
+      <div class="field"><label>Combustible</label>
+        <select id="vComb"><option value="">Seleccionar...</option>
+          <option>Gasolina</option><option>Diésel</option><option>Híbrido</option>
+          <option>Mild-Hybrid</option><option>Eléctrico</option><option>GLP</option>
+        </select>
+      </div>
+      <div class="field"><label>Transmisión</label>
+        <select id="vTrans"><option value="">Seleccionar...</option>
+          <option>Manual 5V</option><option>Manual 6V</option><option>Automático</option>
+          <option>Automático 8G</option><option>DSG 7V</option><option>Automático CVT</option><option>EAT8 Auto</option>
+        </select>
+      </div>
+      <div class="field"><label>Color</label><input type="text" id="vColor" placeholder="Negro, Blanco..."></div>
+      <div class="field"><label>Puertas</label><input type="number" id="vPuertas" placeholder="5" min="2" max="5"></div>
+      <div class="field form-full"><label>Nº Bastidor (VIN)</label><input type="text" id="vBastidor"></div>
+
+      <div class="section-divider">📋 ITV</div>
+      <div class="field"><label>Última ITV</label><input type="date" id="vItvUltima"></div>
+      <div class="field"><label>Próxima ITV</label><input type="date" id="vItvProxima"></div>
+
+      <div class="section-divider">🔧 Neumáticos</div>
+      <div class="field"><label>Año fabricación neumáticos</label><input type="number" id="vNeuAnio" placeholder="2021" min="2000" max="2030"></div>
+      <div class="field"><label>Dibujo (mm)</label><input type="number" id="vNeuMm" placeholder="5.5" step="0.1" min="0" max="10"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('modalVeh')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarVehiculo()">💾 Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================ CHAT IA (FAB + Modal) -->
+<button class="chat-fab hidden" id="chatFab" onclick="toggleChat()" title="Asistente IA – Estimación de piezas">🤖</button>
+<div class="chat-modal hidden" id="chatModal">
+  <div class="chat-card">
+    <div class="chat-header">
+      <div>
+        <h4>🤖 Asistente IA · Grok</h4>
+        <div style="font-size:.72rem;color:rgba(255,255,255,.7)">Estimación de costes de piezas</div>
+      </div>
+      <button class="close-btn" onclick="toggleChat()">✕</button>
+    </div>
+    <div class="chat-msgs" id="chatMsgs">
+      <div class="msg ai">👋 Hola. Soy el asistente KeepCar. Dime el <strong>modelo y marca de tu coche</strong> y las <strong>piezas que quieres cambiar</strong> y te daré una estimación de coste.</div>
+    </div>
+    <div class="chat-footer">
+      <div class="chat-key-row" id="chatKeyRow">
+        <input type="password" id="chatGrokKey" placeholder="API Key Grok (xai-...)">
+        <button class="btn btn-primary btn-sm" onclick="saveGrokFromChat()">OK</button>
+      </div>
+      <div class="chat-input-row">
+        <input type="text" id="chatInput" placeholder="Ej: BMW Serie 3 - pastillas de freno..." onkeydown="if(event.key==='Enter')sendChat()">
+        <button class="btn btn-primary btn-sm" onclick="sendChat()">▶</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+const API = '/api';
+let session = null;
+let grokKey = localStorage.getItem('kc_groq_key') || '';
+let allVehiculos = [];
+
+// ================================================================
+//  UTILS
+// ================================================================
+function hdrs() {
+  return {
+    'Content-Type':'application/json',
+    'X-User-Id':   session?.id   || 0,
+    'X-User-Name': session?.nombre || '',
+    'X-User-Rol':  session?.rol    || 'USER',
+    ...(grokKey ? {'X-Grok-Key': grokKey} : {})
+  };
+}
+function toast(msg, type='s') {
+  const t = document.getElementById('toast');
+  t.innerHTML = msg; t.className = `toast ${type} show`;
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+function timeAgo(d) {
+  const diff = Date.now() - new Date(d).getTime();
+  const m=Math.floor(diff/60000),h=Math.floor(diff/3600000),dy=Math.floor(diff/86400000);
+  if(m<1) return 'Ahora';if(m<60) return `hace ${m}m`;if(h<24) return `hace ${h}h`;
+  if(dy<7) return `hace ${dy}d`;
+  return new Date(d).toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'});
+}
+function isAdmin() { return session?.esAdmin; }
+
+// ================================================================
+//  AUTH
+// ================================================================
+async function doLogin() {
+  const u = document.getElementById('lUser').value.trim();
+  const p = document.getElementById('lPass').value.trim();
+  if (!u||!p) { toast('Completa usuario y contraseña','e'); return; }
+  try {
+    const res = await fetch(`${API}/auth/login`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({usuario:u,password:p})});
+    const d = await res.json();
+    if (d.success) {
+      session=d;
+      // Si es admin, guardar en sessionStorage para que admin.html no pida credenciales
+      if (d.esAdmin) sessionStorage.setItem('kc_admin_session', JSON.stringify(d));
+      startApp();
+    }
+    else { document.getElementById('lErr').classList.remove('hidden'); }
+  } catch(e) { toast('Error conectando al servidor','e'); }
+}
+function loginGoogle() {
+  // Google OAuth flow - redirige a Google para autenticación
+  // En producción: configura Google Client ID en application.properties
+  const clientId = 'YOUR_GOOGLE_CLIENT_ID';
+  const redirect  = encodeURIComponent(window.location.origin + '/api/auth/google/callback');
+  const scope     = encodeURIComponent('openid email profile');
+  const state     = Math.random().toString(36).substring(2);
+  sessionStorage.setItem('oauth_state', state);
+  const url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirect}&response_type=code&scope=${scope}&state=${state}&access_type=offline&prompt=consent`;
+  // En demo: mostrar instrucción
+  toast('⚙️ Google OAuth: configura GOOGLE_CLIENT_ID en application.properties para activarlo','i');
+  // window.location.href = url; // Descomentar cuando esté configurado
+}
+async function doLogout() {
+  try { await fetch(`${API}/auth/logout`,{method:'POST',headers:hdrs()}); } catch(e){}
+  session=null; location.reload();
+}
+document.getElementById('lPass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+document.getElementById('lUser').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('lPass').focus();});
+
+
+// Manejo del callback OAuth2 de Google — se ejecuta al cargar la página
+(function handleGoogleCallback() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('googleLogin') !== '1') return;
+  const id     = params.get('id');
+  const nombre = decodeURIComponent(params.get('nombre') || 'Usuario');
+  const rol    = params.get('rol') || 'USER';
+  const esAdm  = params.get('esAdmin') === 'true';
+  const icono  = params.get('icono') || nombre.charAt(0).toUpperCase();
+  if (!id) return;
+  session = {
+    id: parseInt(id), nombre, usuario: nombre,
+    rol, esAdmin: esAdm, avatarIniciales: icono, icono
+  };
+  if (esAdm) sessionStorage.setItem('kc_admin_session', JSON.stringify(session));
+  history.replaceState({}, '', '/');
+  startApp();
+})();
+
+function startApp() {
+  document.getElementById('loginOverlay').classList.add('hidden');
+  document.getElementById('navbar').classList.remove('hidden');
+  document.getElementById('mainApp').classList.remove('hidden');
+  document.getElementById('chatFab').classList.remove('hidden');
+
+  const av = document.getElementById('navAvatar');
+  av.textContent = session.avatarIniciales || session.nombre.charAt(0);
+  if (isAdmin()) av.classList.add('admin');
+  document.getElementById('navName').textContent = session.nombre;
+  document.getElementById('navRol').textContent  = isAdmin() ? '👑 Administrador' : '👤 Usuario';
+  document.getElementById('homeTitle').textContent = `¡Hola, ${session.nombre.split(' ')[0]}! 👋`;
+  document.getElementById('homeSubtitle').textContent = new Date().toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+
+  // Ajustes - perfil
+  document.getElementById('pNombre').textContent = session.nombre;
+  document.getElementById('pUser').textContent   = session.usuario;
+  document.getElementById('pEmail').textContent  = session.email || '—';
+  document.getElementById('pTel').textContent    = session.telefono || '—';
+  document.getElementById('pRol').textContent    = isAdmin() ? '👑 Administrador' : '👤 Usuario';
+
+  // Mostrar enlace admin SOLO a admins
+  if (isAdmin()) document.getElementById('adminPanelRow').style.display = 'flex';
+
+  // Rellenar Grok key si estaba guardada
+  if (grokKey) {
+    document.getElementById('grokKey').value = grokKey;
+    document.getElementById('chatGrokKey').value = grokKey;
+    document.getElementById('chatKeyRow').classList.add('hidden');
+  }
+
+  cargarTodo();
+  setInterval(actualizarBadge, 20000);
+}
+
+// ================================================================
+//  TABS
+// ================================================================
+function goTab(name) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  document.getElementById('tab-'+name).classList.add('active');
+  if (name==='vehiculo') cargarTablaVehiculos();
+  if (name==='notif')    cargarNotificaciones();
+}
+
+// ================================================================
+//  HOME
+// ================================================================
+async function cargarTodo() {
+  await Promise.all([cargarHomeCards(), actualizarBadge()]);
+}
+async function cargarHomeCards() {
+  try {
+    const [vRes,aRes] = await Promise.all([
+      fetch(`${API}/vehiculos`,{headers:hdrs()}),
+      fetch(`${API}/alertas`,{headers:hdrs()})
+    ]);
+    allVehiculos = await vRes.json();
+    const alertas = await aRes.json();
+    renderStats(alertas, allVehiculos);
+    renderHomeCards(allVehiculos);
+  } catch(e) {
+    document.getElementById('homeCars').innerHTML='<div class="empty">⚠️ Error cargando datos. ¿Está el servidor activo?</div>';
+  }
+}
+function renderStats(a, vehs) {
+  document.getElementById('stTotal').textContent = a.totalVehiculos   ?? '–';
+  document.getElementById('stRojo').textContent  = a.alertasUrgentes  ?? '–';
+  document.getElementById('stAm').textContent    = a.alertasProximas  ?? '–';
+  document.getElementById('stOk').textContent    = a.vehiculosOk      ?? '–';
+  const itvAlert = vehs.filter(v=>v.estadoItv==='URGENTE'||v.estadoItv==='VENCIDA'||v.estadoItv==='PROXIMA').length;
+  document.getElementById('stItvAlert').textContent = itvAlert;
+}
+function renderHomeCards(vehs) {
+  const grid = document.getElementById('homeCars');
+  if (!vehs.length) { grid.innerHTML='<div class="empty">🚗 No tienes vehículos. Ve a <strong>Vehículos</strong> y añade el primero.</div>'; return; }
+  grid.innerHTML = vehs.map(v => carCard(v)).join('');
+}
+function carCard(v) {
+  const est = (v.estadoAceite||'VERDE').toLowerCase();
+  const col = est==='rojo'?'var(--r)':est==='amarillo'?'var(--y)':'var(--g)';
+  const pct = Math.max(0,Math.min(100, v.porcentajeVidaAceite??80));
+  const km  = v.kmRestantesParaCambio??0;
+  const R=30, circum=2*Math.PI*R, off=circum-(pct/100)*circum;
+
+  // ITV tag
+  let itvTag='';
+  if (v.estadoItv && v.estadoItv!=='SIN_DATOS') {
+    const itv=v.estadoItv;
+    const itvCls=itv==='OK'?'verde':itv==='PROXIMA'?'amarillo':itv==='URGENTE'?'orange':'rojo';
+    const itvTxt=itv==='OK'?'ITV ✓':itv==='PROXIMA'?'ITV próxima':itv==='URGENTE'?'ITV urgente':'ITV vencida';
+    itvTag=`<span class="tag ${itvCls}">${itvTxt}</span>`;
+  }
+  // Ruedas tag
+  let ruedaTag='';
+  if (v.estadoNeumaticos && v.estadoNeumaticos!=='OK') {
+    const nCls=v.estadoNeumaticos==='CAMBIAR'?'rojo':'amarillo';
+    const nTxt=v.estadoNeumaticos==='CAMBIAR'?'🔧 Cambiar ruedas':'⚠️ Revisar ruedas';
+    ruedaTag=`<span class="tag ${nCls}">${nTxt}</span>`;
+  }
+
+  return `
+  <div class="car-card ${est}">
+    <div class="car-head">
+      <div>
+        <div class="car-title">${v.marca} ${v.modelo}</div>
+        <div class="car-sub">${v.matricula||'–'} · ${v.anio||'–'}</div>
+      </div>
+      <span class="tag ${est}">${est==='rojo'?'🔴 Urgente':est==='amarillo'?'🟡 Próximo':'🟢 Al día'}</span>
+    </div>
+    ${(itvTag||ruedaTag)?`<div class="car-alerts">${itvTag}${ruedaTag}</div>`:''}
+    <div class="circ-row">
+      <div class="circ-svg">
+        <svg width="82" height="82" viewBox="0 0 82 82">
+          <circle cx="41" cy="41" r="${R}" fill="none" stroke="var(--s3)" stroke-width="6"/>
+          <circle cx="41" cy="41" r="${R}" fill="none" stroke="${col}" stroke-width="6"
+            stroke-linecap="round" stroke-dasharray="${circum.toFixed(1)}" stroke-dashoffset="${off.toFixed(1)}"/>
+        </svg>
+        <div class="circ-label">
+          <span class="circ-pct" style="color:${col}">${Math.round(pct)}%</span>
+          <span class="circ-txt">aceite</span>
+        </div>
+      </div>
+      <div class="circ-info">
+        <div class="km-val" style="color:${col}">${km>0?'+':''}${Math.round(km).toLocaleString()} km</div>
+        <div class="km-lbl">${km>0?'para el próximo cambio':'¡cambio vencido!'}</div>
+        <div class="km-detail">Actual: <strong>${(v.kilometrajeActual||0).toLocaleString()} km</strong></div>
+        ${v.propietarioNombre?`<div class="km-detail" style="margin-top:2px;color:var(--t3)">👤 ${v.propietarioNombre}</div>`:''}
+      </div>
+    </div>
+    <div class="km-form">
+      <input type="number" id="km_${v.id}" value="${v.kilometrajeActual}" placeholder="Nuevo km">
+      <button class="btn btn-primary btn-sm" onclick="actualizarKm(${v.id})">📍 Actualizar</button>
+    </div>
+  </div>`;
+}
+
+// ================================================================
+//  VEHÍCULOS
+// ================================================================
+async function cargarTablaVehiculos() {
+  document.getElementById('vehTbl').innerHTML='<div class="loading"><div class="spinner"></div><div>Cargando...</div></div>';
+  try {
+    const res = await fetch(`${API}/vehiculos`,{headers:hdrs()});
+    allVehiculos = await res.json();
+    renderTabla();
+  } catch(e) { document.getElementById('vehTbl').innerHTML='<div class="empty">⚠️ Error.</div>'; }
+}
+function renderTabla() {
+  if (!allVehiculos.length) { document.getElementById('vehTbl').innerHTML='<div class="empty">Sin vehículos. ¡Añade el primero!</div>'; return; }
+  document.getElementById('vehTbl').innerHTML=`
+  <table class="kc-tbl">
+    <thead><tr>
+      <th>Vehículo</th><th>Matrícula</th><th>Año</th><th>Km actual</th>
+      <th>Aceite</th><th>ITV</th><th>Ruedas</th>
+      ${isAdmin()?'<th>Propietario</th>':''}
+      <th>Acciones</th>
+    </tr></thead>
+    <tbody>
+    ${allVehiculos.map(v=>{
+      const est=(v.estadoAceite||'VERDE').toLowerCase();
+      const itv=v.estadoItv||'SIN_DATOS';
+      const neu=v.estadoNeumaticos||'OK';
+      const itvCls=itv==='OK'?'verde':itv==='PROXIMA'?'amarillo':itv==='URGENTE'?'orange':itv==='VENCIDA'?'rojo':'grey';
+      const neuCls=neu==='OK'?'verde':neu==='REVISAR'?'amarillo':'rojo';
+      return `<tr>
+        <td><strong>${v.marca} ${v.modelo}</strong></td>
+        <td>${v.matricula||'–'}</td>
+        <td>${v.anio||'–'}</td>
+        <td>${(v.kilometrajeActual||0).toLocaleString()} km</td>
+        <td><span class="tag ${est}">${est==='rojo'?'🔴 Urgente':est==='amarillo'?'🟡 Próximo':'🟢 OK'}</span></td>
+        <td><span class="tag ${itvCls}">${itv==='SIN_DATOS'?'–':v.estadoItvDescripcion||itv}</span></td>
+        <td><span class="tag ${neuCls}">${neu==='OK'?'🟢 OK':neu==='REVISAR'?'⚠️ Revisar':'🔧 Cambiar'}</span></td>
+        ${isAdmin()?`<td>${v.propietarioNombre||'–'}</td>`:''}
+        <td><div class="actions">
+          <button class="btn btn-ghost btn-sm" onclick="verSpecs(${v.id})">📋</button>
+          <button class="btn btn-ghost btn-sm" onclick="editarVehiculo(${v.id})">✏️</button>
+          <button class="btn btn-danger btn-sm" onclick="borrarVehiculo(${v.id})">🗑️</button>
+        </div></td>
+      </tr>`;
+    }).join('')}
+    </tbody>
+  </table>`;
+}
+function verSpecs(id) {
+  const v = allVehiculos.find(x=>x.id===id); if(!v) return;
+  const p = document.getElementById('specsPanel');
+  p.innerHTML=`
+  <div style="background:var(--s1);border:1px solid var(--bdr);border-radius:var(--r16);padding:1.4rem;margin-top:1.2rem;">
+    <h4 style="font-size:.95rem;font-weight:700;margin-bottom:1rem;color:var(--t2)">📋 Especificaciones – ${v.marca} ${v.modelo}</h4>
+    <div class="specs-row">
+      <div class="spec-item"><div class="spec-val">${v.motorCc?v.motorCc+'cc':'–'}</div><div class="spec-lbl">Motor</div></div>
+      <div class="spec-item"><div class="spec-val">${v.potenciaCv?v.potenciaCv+' CV':'–'}</div><div class="spec-lbl">Potencia</div></div>
+      <div class="spec-item"><div class="spec-val">${v.combustible||'–'}</div><div class="spec-lbl">Combustible</div></div>
+      <div class="spec-item"><div class="spec-val" style="font-size:.8rem">${v.transmision||'–'}</div><div class="spec-lbl">Transmisión</div></div>
+      <div class="spec-item"><div class="spec-val">${v.color||'–'}</div><div class="spec-lbl">Color</div></div>
+      <div class="spec-item"><div class="spec-val">${v.numPuertas||'–'}</div><div class="spec-lbl">Puertas</div></div>
+      <div class="spec-item"><div class="spec-val" style="font-size:.7rem;color:${v.estadoNeumaticos==='CAMBIAR'?'var(--r)':v.estadoNeumaticos==='REVISAR'?'var(--y)':'var(--g)'}">${v.anioFabricacionNeumaticos?v.anioFabricacionNeumaticos+' ('+v.edadNeumaticosAnios+'a)':'–'}</div><div class="spec-lbl">Año ruedas</div></div>
+      <div class="spec-item"><div class="spec-val" style="color:${v.dibujoNeumaticoMm<3?'var(--r)':v.dibujoNeumaticoMm<4?'var(--y)':'var(--g)'}">${v.dibujoNeumaticoMm?v.dibujoNeumaticoMm+'mm':'–'}</div><div class="spec-lbl">Dibujo neumático</div></div>
+      <div class="spec-item"><div class="spec-val" style="font-size:.75rem">${v.fechaProximaItv||'–'}</div><div class="spec-lbl">Próxima ITV</div></div>
+    </div>
+    <div style="margin-top:.75rem;font-size:.75rem;color:var(--t3)">VIN: ${v.numBastidor||'–'}</div>
+  </div>`;
+  p.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function openAddModal() {
+  document.getElementById('modalVehTitle').textContent='➕ Nuevo Vehículo';
+  document.getElementById('vehId').value='';
+  ['vMarca','vModelo','vAnio','vMatricula','vKmActual','vKmUltimo','vMotor','vCV','vComb','vTrans','vColor','vPuertas','vBastidor','vItvUltima','vItvProxima','vNeuAnio','vNeuMm']
+    .forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+  document.getElementById('modalVeh').classList.remove('hidden');
+}
+function editarVehiculo(id) {
+  const v=allVehiculos.find(x=>x.id===id); if(!v) return;
+  document.getElementById('modalVehTitle').textContent='✏️ Editar Vehículo';
+  document.getElementById('vehId').value=v.id;
+  document.getElementById('vMarca').value=v.marca||'';
+  document.getElementById('vModelo').value=v.modelo||'';
+  document.getElementById('vAnio').value=v.anio||'';
+  document.getElementById('vMatricula').value=v.matricula||'';
+  document.getElementById('vKmActual').value=v.kilometrajeActual||'';
+  document.getElementById('vKmUltimo').value=v.ultimoCambioAceiteKm||'';
+  document.getElementById('vMotor').value=v.motorCc||'';
+  document.getElementById('vCV').value=v.potenciaCv||'';
+  document.getElementById('vComb').value=v.combustible||'';
+  document.getElementById('vTrans').value=v.transmision||'';
+  document.getElementById('vColor').value=v.color||'';
+  document.getElementById('vPuertas').value=v.numPuertas||'';
+  document.getElementById('vBastidor').value=v.numBastidor||'';
+  document.getElementById('vItvUltima').value=v.fechaUltimaItv||'';
+  document.getElementById('vItvProxima').value=v.fechaProximaItv||'';
+  document.getElementById('vNeuAnio').value=v.anioFabricacionNeumaticos||'';
+  document.getElementById('vNeuMm').value=v.dibujoNeumaticoMm||'';
+  document.getElementById('modalVeh').classList.remove('hidden');
+}
+async function guardarVehiculo() {
+  const id=document.getElementById('vehId').value;
+  const kmU=parseFloat(document.getElementById('vKmUltimo').value)||0;
+  const body={
+    marca:       document.getElementById('vMarca').value.trim(),
+    modelo:      document.getElementById('vModelo').value.trim(),
+    anio:        parseInt(document.getElementById('vAnio').value)||null,
+    matricula:   document.getElementById('vMatricula').value.trim()||null,
+    kilometrajeActual: parseFloat(document.getElementById('vKmActual').value)||0,
+    ultimoCambioAceiteKm:  kmU,
+    proximoCambioAceiteKm: kmU+10000,
+    motorCc:     parseInt(document.getElementById('vMotor').value)||null,
+    potenciaCv:  parseInt(document.getElementById('vCV').value)||null,
+    combustible: document.getElementById('vComb').value||null,
+    transmision: document.getElementById('vTrans').value||null,
+    color:       document.getElementById('vColor').value.trim()||null,
+    numPuertas:  parseInt(document.getElementById('vPuertas').value)||null,
+    numBastidor: document.getElementById('vBastidor').value.trim()||null,
+    fechaUltimaItv:   document.getElementById('vItvUltima').value||null,
+    fechaProximaItv:  document.getElementById('vItvProxima').value||null,
+    anioFabricacionNeumaticos: parseInt(document.getElementById('vNeuAnio').value)||null,
+    dibujoNeumaticoMm: parseFloat(document.getElementById('vNeuMm').value)||null,
+    activo:true
+  };
+  if(!body.marca||!body.modelo){toast('Marca y modelo son obligatorios','e');return;}
+  try {
+    const res=await fetch(id?`${API}/vehiculos/${id}`:`${API}/vehiculos`,
+      {method:id?'PUT':'POST',headers:hdrs(),body:JSON.stringify(body)});
+    if(res.ok){
+      closeModal('modalVeh');
+      toast(id?'✅ Vehículo actualizado':'🚗 Vehículo añadido','s');
+      cargarTablaVehiculos(); cargarHomeCards();
+    } else toast('Error al guardar','e');
+  } catch(e){toast('Error de conexión','e');}
+}
+async function borrarVehiculo(id) {
+  const v=allVehiculos.find(x=>x.id===id);
+  if(!confirm(`¿Eliminar ${v?.marca} ${v?.modelo}?`)) return;
+  try {
+    const res=await fetch(`${API}/vehiculos/${id}`,{method:'DELETE',headers:hdrs()});
+    if(res.ok){toast('🗑️ Vehículo eliminado','w');cargarTablaVehiculos();cargarHomeCards();}
+    else toast('Error al eliminar','e');
+  } catch(e){toast('Error de conexión','e');}
+}
+async function actualizarKm(id) {
+  const km=parseFloat(document.getElementById(`km_${id}`)?.value);
+  if(!km||km<=0){toast('Km no válido','e');return;}
+  try {
+    const res=await fetch(`${API}/vehiculos/${id}/km`,{method:'PUT',headers:hdrs(),body:JSON.stringify({kilometrajeActual:km})});
+    if(res.ok){toast('📍 Km actualizado','s');cargarHomeCards();}
+    else toast('Error al actualizar','e');
+  } catch(e){toast('Error de conexión','e');}
+}
+document.getElementById('modalVeh').addEventListener('click',function(e){if(e.target===this)closeModal('modalVeh');});
+
+// ================================================================
+//  NOTIFICACIONES
+// ================================================================
+const TIPO_EMOJI={'CAMBIO_ACEITE_URGENTE':'🔴','CAMBIO_ACEITE_PROXIMO':'🟡','REVISION_GENERAL':'🔵','ITV_PROXIMA':'📋','NEUMATICOS':'🔧','SISTEMA_INFO':'ℹ️'};
+const TIPO_LBL={'CAMBIO_ACEITE_URGENTE':'Aceite urgente','CAMBIO_ACEITE_PROXIMO':'Aceite próximo','REVISION_GENERAL':'Revisión','ITV_PROXIMA':'ITV','NEUMATICOS':'Neumáticos','SISTEMA_INFO':'Sistema'};
+
+async function cargarNotificaciones() {
+  document.getElementById('notifList').innerHTML='<div class="loading"><div class="spinner"></div><div>Cargando...</div></div>';
+  try {
+    const res=await fetch(`${API}/notificaciones`,{headers:hdrs()});
+    const notifs=await res.json();
+    renderNotifs(notifs); actualizarBadge();
+  } catch(e){document.getElementById('notifList').innerHTML='<div class="empty">⚠️ Error.</div>';}
+}
+function renderNotifs(notifs) {
+  const el=document.getElementById('notifList');
+  if(!notifs.length){el.innerHTML='<div class="empty">✅ Sin notificaciones.</div>';return;}
+  el.innerHTML='<div class="notif-wrap">'+notifs.map(n=>{
+    const unread=!n.leida?' unread':'';
+    const emoji=TIPO_EMOJI[n.tipo]||'🔔';
+    const lbl=TIPO_LBL[n.tipo]||n.tipo;
+    return `<div class="notif-item${unread}" id="notif_${n.id}">
+      <div class="notif-icon">${emoji}</div>
+      <div class="notif-body">
+        <div class="notif-msg">${n.mensaje}</div>
+        <div class="notif-meta">
+          <span class="tag grey" style="font-size:.68rem;padding:1px 7px">${lbl}</span>
+          ${n.vehiculoNombre?`<span>🚗 ${n.vehiculoNombre}</span>`:''}
+          ${n.vehiculoMatricula?`<span style="opacity:.6">(${n.vehiculoMatricula})</span>`:''}
+          <span>· ${timeAgo(n.fecha)}</span>
+          ${!n.leida?'<span style="color:var(--p);font-weight:600">● Nueva</span>':''}
+        </div>
+      </div>
+      <div class="notif-actions">
+        ${!n.leida?`<button class="btn btn-ghost btn-sm" onclick="leerUna(${n.id},true)">Leída</button>`:''}
+        ${n.leida?`<button class="btn btn-ghost btn-sm" onclick="marcarNoLeida(${n.id})">No leída</button>`:''}
+      </div>
+    </div>`;
+  }).join('')+'</div>';
+}
+async function leerUna(id, reload=false) {
+  try {
+    await fetch(`${API}/notificaciones/${id}/leer`,{method:'PUT',headers:hdrs()});
+    if(reload) cargarNotificaciones();
+    else { const el=document.getElementById(`notif_${id}`); if(el) el.classList.remove('unread'); }
+    actualizarBadge();
+  } catch(e){}
+}
+async function marcarNoLeida(id) {
+  try {
+    await fetch(`${API}/notificaciones/${id}/no-leer`,{method:'PUT',headers:hdrs()});
+    cargarNotificaciones();
+  } catch(e){ toast('Funcionalidad disponible en la próxima versión','i'); }
+}
+async function leerTodas() {
+  try {
+    await fetch(`${API}/notificaciones/leer-todas`,{method:'PUT',headers:hdrs()});
+    toast('✅ Todas marcadas como leídas','s');
+    cargarNotificaciones();
+  } catch(e){toast('Error','e');}
+}
+async function actualizarBadge() {
+  try {
+    const res=await fetch(`${API}/notificaciones/count`,{headers:hdrs()});
+    const d=await res.json();
+    const b=document.getElementById('badgeCount');
+    if(d.noLeidas>0){b.textContent=d.noLeidas;b.classList.remove('hidden');}
+    else b.classList.add('hidden');
+  } catch(e){}
+}
+
+// ================================================================
+//  AJUSTES
+// ================================================================
+async function cambiarPassword() {
+  const actual=document.getElementById('passActual').value;
+  const nueva=document.getElementById('passNueva').value;
+  const conf=document.getElementById('passConfirm').value;
+  const err=document.getElementById('passErr');
+  if(!actual||!nueva){err.textContent='Completa todos los campos.';err.classList.remove('hidden');return;}
+  if(nueva!==conf){err.textContent='Las contraseñas no coinciden.';err.classList.remove('hidden');return;}
+  if(nueva.length<6){err.textContent='Mínimo 6 caracteres.';err.classList.remove('hidden');return;}
+  try {
+    const res=await fetch(`${API}/usuario/cambiar-password`,{method:'POST',headers:hdrs(),body:JSON.stringify({passwordActual:actual,nuevaPassword:nueva})});
+    const d=await res.json();
+    if(d.success){err.classList.add('hidden');['passActual','passNueva','passConfirm'].forEach(i=>document.getElementById(i).value='');toast('🔑 Contraseña actualizada','s');}
+    else{err.textContent=d.mensaje||'Error.';err.classList.remove('hidden');}
+  } catch(e){toast('Error de conexión','e');}
+}
+function saveGrokKey() {
+  grokKey=document.getElementById('grokKey').value.trim();
+  if(grokKey){localStorage.setItem('kc_groq_key',grokKey);toast('🤖 API Key Grok guardada','s');}
+  else{localStorage.removeItem('kc_groq_key');toast('API Key eliminada','w');}
+}
+function saveGrokFromChat() {
+  grokKey=document.getElementById('chatGrokKey').value.trim();
+  if(grokKey){
+    localStorage.setItem('kc_groq_key',grokKey);
+    document.getElementById('chatKeyRow').classList.add('hidden');
+    toast('🤖 Clave guardada','s');
+  }
+}
+
+// ================================================================
+//  CHAT GROK IA
+// ================================================================
+let chatOpen=false;
+function toggleChat() {
+  chatOpen=!chatOpen;
+  document.getElementById('chatModal').classList.toggle('hidden',!chatOpen);
+  document.getElementById('chatFab').classList.toggle('hidden',chatOpen);
+  if(chatOpen && !grokKey) document.getElementById('chatKeyRow').classList.remove('hidden');
+  else document.getElementById('chatKeyRow').classList.add('hidden');
+}
+function addMsg(text,role) {
+  const msgs=document.getElementById('chatMsgs');
+  const d=document.createElement('div');
+  d.className='msg '+role;
+  d.innerHTML=text;
+  msgs.appendChild(d);
+  msgs.scrollTop=msgs.scrollHeight;
+  return d;
+}
+async function sendChat() {
+  const input=document.getElementById('chatInput');
+  const text=input.value.trim();
+  if(!text) return;
+  input.value='';
+  addMsg(text,'user');
+  const typing=addMsg('⏳ Pensando...','ai typing');
+
+  const vehiculoCtx=allVehiculos.length?`El usuario tiene estos vehículos: ${allVehiculos.map(v=>`${v.marca} ${v.modelo} ${v.anio||''} (${(v.kilometrajeActual||0).toLocaleString()} km)`).join(', ')}.`:'' ;
+
+  const systemPrompt=`Eres el asistente mecánico de KeepCar, una app de gestión de mantenimiento vehicular. ${vehiculoCtx} Tu tarea es dar estimaciones de coste de piezas y mano de obra para España. Responde siempre en español, de forma concisa y con rangos de precios realistas en euros. Si te preguntan por piezas, da precio de la pieza + mano de obra. Usa formato claro.`;
+
+  try {
+    const key=grokKey||localStorage.getItem('kc_groq_key');
+    if(!key){typing.innerHTML='⚠️ Configura tu API Key de Grok en Ajustes → Chat IA.';typing.classList.remove('typing');return;}
+
+    const res=await fetch(`${API}/ai/chat`,{
+      method:'POST',
+      headers:{...hdrs(),'X-Grok-Key':key},
+      body:JSON.stringify({
+        model:'llama3-8b-8192',
+        max_tokens:600,
+        messages:[
+          {role:'system',content:systemPrompt},
+          {role:'user',  content:text}
+        ]
+      })
+    });
+    const d=await res.json();
+    if(d.error){typing.innerHTML='❌ '+d.error;typing.classList.remove('typing');return;}
+    const content=d.choices?.[0]?.message?.content||'Sin respuesta del modelo.';
+    typing.innerHTML=content.replace(/\n/g,'<br>');
+    typing.classList.remove('typing');
+  } catch(e) {
+    typing.innerHTML='❌ Error conectando con Grok API.';
+    typing.classList.remove('typing');
+  }
+}
+document.getElementById('chatInput').addEventListener('keydown',e=>{if(e.key==='Enter')sendChat();});
+</script>
+</body>
+</html>
